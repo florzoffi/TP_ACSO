@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include "shell.h"
+
+/* Tipo de todas las cosas a las que necesito darle nombre para poder hacer funcionar la cpu
+
+
+*/
 
 void process_instruction()
 {
