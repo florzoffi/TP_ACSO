@@ -1,3 +1,6 @@
+#ifndef HOPSCOTCH_H
+#define HOPSCOTCH_H
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -75,3 +78,5 @@ void dictionary_destroy(dictionary_t *dictionary);
 
 void dictionary_free_entry( struct dictionary_entry *entry, destroy_f destroy );
 bool dictionary_resize( struct dictionary *dictionary );
+
+#endif
