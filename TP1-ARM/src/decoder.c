@@ -7,7 +7,6 @@ void decode(){
     uint32_t instruction = mem_read_32( NEXT_STATE.PC );
     uint32_t opcode_mask = 0b11111111000000000000000000000000;
     uint32_t opcode = (instruction & opcode_mask) >> 24;
-    
 }
 
 typedef struct {
@@ -22,7 +21,7 @@ typedef struct {
     uint32_t op;
     uint32_t rt;
     uint32_t cond_br;
-     uint32_t mov;
+    uint32_t mov;
 } partition;
 
 typedef enum {
