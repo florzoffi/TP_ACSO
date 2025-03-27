@@ -44,7 +44,7 @@ void ADD_INSTRUCTION( uint32_t opcode, void* decode_fn, void* execute_fn, char* 
 }
 
 void init_instruction_table() {
-    instruction_table = dictionary_create( NULL );
+    instruction_table = dictionary_create( free );
     if ( !instruction_table ) {
         fprintf( stderr, "Error al crear el diccionario de instrucciones\n" );
         exit( 1 );
