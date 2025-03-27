@@ -11,6 +11,8 @@
 
 int BRANCH_OCCURRED = FALSE;
 
+#define XZR 0x1f
+
 static dictionary_t *instruction_table = NULL;
 
 char* uint32_to_string( uint32_t number ) {
@@ -53,13 +55,14 @@ void init_instruction_table() {
 }
 
 void adds_extended_register( partition_t *instruction_data ) {
-    uint64_t x1 = CURRENT_STATE.REGS[instruction_data->rn];
-    uint64_t num = CURRENT_STATE.REGS[instruction_data->rm];
-    uint64_t x0 = x1 + num;
-
-    NEXT_STATE.FLAG_N = x0 >> 63; 
-    NEXT_STATE.FLAG_Z = ( x0 == 0 ) ? 1 : 0;
-    NEXT_STATE.REGS[instruction_data->rd] = x0;
+    uint64_t operand1 = CURRENT_STATE.REGS[instruction_data->rn];
+    uint64_t operand2 = CURRENT_STATE.REGS[instruction_data->rm];
+    uint64_t result = operand1 + operand2;
+    NEXT_STATE.FLAG_N = result >> 63;
+    NEXT_STATE.FLAG_Z = result == 0;
+    if (instruction_data->rd != XZR) {
+        NEXT_STATE.REGS[instruction_data->rd] = result;
+    }
 }
 
 void lazy_innit_hash() {
