@@ -70,8 +70,10 @@ void adds_extended_register( partition_t *instruction_data ) {
     }
 
     // Imprimir estado después de la ejecución
-   printf("Resultado de la operación: 0x%" PRIx64 " (Valor: %" PRId64 ")\n", result, result);
-
+    printf("Después de adds:\n");
+    printf("Resultado en rd (X%d): 0x%" PRIx64 "\n", instruction_data->rd, NEXT_STATE.REGS[instruction_data->rd]);
+    printf("FLAG_N: %d\n", NEXT_STATE.FLAG_N);
+    printf("FLAG_Z: %d\n", NEXT_STATE.FLAG_Z);
 }
 
 void lazy_innit_hash() {
