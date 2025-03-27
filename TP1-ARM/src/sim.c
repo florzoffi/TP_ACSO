@@ -55,6 +55,11 @@ void init_instruction_table() {
 }
 
 void adds_extended_register( partition_t *instruction_data ) {
+        printf("Antes de adds:\n");
+    printf("Registro rn (X%d): 0x%" PRIx64 "\n", instruction_data->rn, CURRENT_STATE.REGS[instruction_data->rn]);
+    printf("Registro rm (X%d): 0x%" PRIx64 "\n", instruction_data->rm, CURRENT_STATE.REGS[instruction_data->rm]);
+    printf("Registro rd (X%d): 0x%" PRIx64 "\n", instruction_data->rd, CURRENT_STATE.REGS[instruction_data->rd]);
+
     uint64_t operand1 = CURRENT_STATE.REGS[instruction_data->rn];
     uint64_t operand2 = CURRENT_STATE.REGS[instruction_data->rm];
     uint64_t result = operand1 + operand2;
@@ -63,6 +68,12 @@ void adds_extended_register( partition_t *instruction_data ) {
     if (instruction_data->rd != XZR) {
         NEXT_STATE.REGS[instruction_data->rd] = result;
     }
+
+    // Imprimir estado después de la ejecución
+    printf("Después de adds:\n");
+    printf("Resultado en rd (X%d): 0x%" PRIx64 "\n", instruction_data->rd, NEXT_STATE.REGS[instruction_data->rd]);
+    printf("FLAG_N: %d\n", NEXT_STATE.FLAG_N);
+    printf("FLAG_Z: %d\n", NEXT_STATE.FLAG_Z);
 }
 
 void lazy_innit_hash() {
