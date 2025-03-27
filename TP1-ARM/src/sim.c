@@ -8,14 +8,9 @@
 #include "shell.h"
 #include "hopscotch.h"
 #include "decoder.h"
+#include "sim.h"
 
 int BRANCH_OCCURRED = FALSE;
-
-typedef struct {
-    void ( *decode )( partition_t *decoded, uint32_t instruction_code );
-    void ( *execute )( partition_t *decoded );
-    char *name;
-} instruction_info_t;
 
 static dictionary_t *instruction_table = NULL;
 
@@ -29,7 +24,7 @@ char* uint32_to_string( uint32_t number ) {
     return key;
 }
 
-void ADD_INSTRUCTION( opcode, decode_fn, execute_fn, name_str ){ 
+void ADD_INSTRUCTION( uint32_t opcode, void* decode_fn, void* execute_fn, char* name_str ){ 
     instruction_info_t *info = malloc( sizeof( instruction_info_t ) ); 
     if ( !info ) {
         fprintf( stderr, "Failed to allocate memory for instruction_info\n" );
