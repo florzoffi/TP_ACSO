@@ -57,21 +57,21 @@ void adds_extended_register( partition_t *instruction_data ) {
     uint64_t num = CURRENT_STATE.REGS[instruction_data->rm];
     uint64_t x0 = x1 + num;
 
-    // Actualización de las banderas de estado
-    NEXT_STATE.FLAG_N = x0 >> 63;  // Extrae el bit más significativo
+    NEXT_STATE.FLAG_N = x0 >> 63; 
     NEXT_STATE.FLAG_Z = ( x0 == 0 ) ? 1 : 0;
-
-    // Actualiza el registro destino con el resultado
     NEXT_STATE.REGS[instruction_data->rd] = x0;
 }
 
 void process_instruction() {
     if ( instruction_table == NULL ) {
+        printf( "hay que crear tabla" );
         init_instruction_table();
+        printf( "se creó la tabla" );
     }
 
     // Leemos la instrucción a realizar.
     uint32_t instruction = mem_read_32( CURRENT_STATE.PC );
+    printf( "se leyó la instrucción" );
 
     // Inicializo un puntero que va a almacenar lo que me devuelva el hash
     instruction_info_t *info = NULL;
@@ -81,6 +81,7 @@ void process_instruction() {
 
     // Inicializo una variable booleana para saber si el diccionario encontró o no la clave.
     bool err = false;
+    printf( "inicializacion de variables" );
     
     // Tipo B (bits 31:26, 6 bits), el primer tipo de instrucción que probamos
     uint32_t opcode_b = ( instruction >> 26 ) & 0x3F;
@@ -88,6 +89,7 @@ void process_instruction() {
     info = dictionary_get( instruction_table, key_b, &err );
     free( key_b );
     if ( !err && info ) goto dispatch;
+    printf( "opcode 1 done" );
 
     // Tipo CB (bits 31:24, 8 bits)
     uint32_t opcode_cb = ( instruction >> 24 ) & 0xFF;
@@ -95,6 +97,7 @@ void process_instruction() {
     info = dictionary_get( instruction_table, key_cb, &err );
     free( key_cb );
     if ( !err && info ) goto dispatch;
+    printf( "opcode 2 done" );
 
     // Tipo I (bits 31:22, 10 bits)
     uint32_t opcode_i = ( instruction >> 22 ) & 0x3FF;
@@ -102,6 +105,7 @@ void process_instruction() {
     info = dictionary_get( instruction_table, key_i, &err );
     free( key_i );
     if ( !err && info ) goto dispatch;
+    printf( "opcode 3 done" );
 
     // Tipo R / D / IW (bits 31:21, 11 bits)
     uint32_t opcode_r_d_iw = ( instruction >> 21 ) & 0x7FF;
@@ -109,6 +113,7 @@ void process_instruction() {
     info = dictionary_get( instruction_table, key_r_d_iw, &err );
     free( key_r_d_iw );
     if ( !err && info ) goto dispatch;
+    printf( "opcode 4 done" );
 
     // Handle que no reconoció la instrucción 
     //printf("Instrucción no reconocida: 0x%08x", instruction);
@@ -117,7 +122,9 @@ void process_instruction() {
 
     // Ejecutar con la estructura decodificada
     dispatch:
-    info->decode( &splitted, instruction );   
+    printf( "empieza el split" );
+    info->decode( &splitted, instruction );  
+    printf( "empueza el execute" ); 
     info->execute( &splitted );              
 
     if ( !BRANCH_OCCURRED ) {
