@@ -49,7 +49,7 @@ void init_instruction_table() {
         fprintf( stderr, "Error al crear el diccionario de instrucciones\n" );
         exit( 1 );
     }
-    ADD_INSTRUCTION( 0x5, split_r, adds_extended_register, "Adds Extended Register" );
+    ADD_INSTRUCTION( 0x2C4, split_r, adds_extended_register, "Adds Extended Register" );
 }
 
 void adds_extended_register( partition_t *instruction_data ) {
