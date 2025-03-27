@@ -25,6 +25,7 @@ typedef struct {
 } instruction_info_t;
 
 void adds_extended_register(partition_t* p);
+void adds_immediate(partition_t* p);
 void init_instruction_table();
 char* uint32_to_string( uint32_t number );
 
