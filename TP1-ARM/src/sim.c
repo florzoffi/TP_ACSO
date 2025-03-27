@@ -62,15 +62,19 @@ void adds_extended_register( partition_t *instruction_data ) {
     NEXT_STATE.REGS[instruction_data->rd] = x0;
 }
 
-void process_instruction() {
+void lazy_innit_hash() {
     printf( "entro a la funcion process_intstruction" );
     if ( instruction_table == NULL ) {
         printf( "hay que crear tabla" );
         init_instruction_table();
         printf( "se creó la tabla" );
     }
+}
 
-    // Leemos la instrucción a realizar.
+
+void process_instruction() {
+    lazy_innit_hash();
+    
     uint32_t instruction = mem_read_32( CURRENT_STATE.PC );
     printf( "se leyó la instrucción" );
 
