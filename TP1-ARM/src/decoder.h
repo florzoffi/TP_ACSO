@@ -29,12 +29,12 @@ void init_instruction_table();
 char* uint32_to_string( uint32_t number );
 
 void decode(void);
-void split_r(uint32_t instruction, partition_t* parts);
-void split_i(uint32_t instruction, partition_t* parts);
-void split_d(uint32_t instruction, partition_t* parts);
-void split_b(uint32_t instruction, partition_t* parts);
-void split_cb(uint32_t instruction, partition_t* parts);
-void split_iw(uint32_t instruction, partition_t* parts);
+void split_r( partition_t* parts, uint32_t instruction );
+void split_i( partition_t* parts, uint32_t instruction );
+void split_d( partition_t* parts, uint32_t instruction );
+void split_b( partition_t* parts, uint32_t instruction );
+void split_cb( partition_t* parts, uint32_t instruction );
+void split_iw( partition_t* parts, uint32_t instruction );
 uint16_t show(uint32_t instruction, int shift, uint32_t mask);
 
 #endif
