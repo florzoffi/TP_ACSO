@@ -71,7 +71,6 @@ void lazy_innit_hash() {
     }
 }
 
-
 void process_instruction() {
     lazy_innit_hash();
     
@@ -87,7 +86,7 @@ void process_instruction() {
     // Inicializo una variable booleana para saber si el diccionario encontró o no la clave.
     bool err = false;
     printf( "inicializacion de variables" );
-    
+
     // Tipo B (bits 31:26, 6 bits), el primer tipo de instrucción que probamos
     uint32_t opcode_b = ( instruction >> 26 ) & 0x3F;
     char* key_b = uint32_to_string( opcode_b );
@@ -127,6 +126,10 @@ void process_instruction() {
 
     // Ejecutar con la estructura decodificada
     dispatch:
+    if (!info || !info->decode || !info->execute) {
+        printf("ERROR: info o sus punteros están en NULL\n");
+        exit(1);
+    }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
     printf( "empueza el execute" ); 
