@@ -70,18 +70,18 @@ void adds_extended_register( partition_t *split_data ) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
     NEXT_STATE.FLAG_N = operation >> 63;
     NEXT_STATE.FLAG_Z = operation == 0;
+    NEXT_STATE.REGS[split_data->rd] = operation;
 }
 
 void adds_immediate(partition_t *instruction_data) {
-    uint64_t operand1 = CURRENT_STATE.REGS[instruction_data->rn];
     uint64_t imm = instruction_data->alu;
     if (instruction_data->shamt == 0x1) {
         imm <<= 12;
     }
-    uint64_t result = operand1 + imm;
-    NEXT_STATE.FLAG_N = result >> 63;
-    NEXT_STATE.FLAG_Z = result == 0;
-    NEXT_STATE.REGS[instruction_data->rd] = result;
+    uint64_t operataion = CURRENT_STATE.REGS[instruction_data->rn] + imm;
+    NEXT_STATE.FLAG_N = operataion >> 63;
+    NEXT_STATE.FLAG_Z = operataion == 0;
+    NEXT_STATE.REGS[instruction_data->rd] = operataion;
 
 }
 
