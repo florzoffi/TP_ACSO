@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct partition_t{
+typedef struct{
     uint32_t opcode;
     uint32_t rm;
     uint32_t shamt;
@@ -16,7 +16,7 @@ typedef struct partition_t{
     uint32_t rt;
     uint32_t cond_br;
     uint32_t mov;
-};
+}partition_t;
 
 void decode(void);
 void split_r(uint32_t instruction, partition_t* parts);
