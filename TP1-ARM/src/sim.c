@@ -76,6 +76,7 @@ void process_instruction() {
     
     uint32_t instruction = mem_read_32( CURRENT_STATE.PC );
     printf( "se leyó la instrucción" );
+    printf("\nInstruction: 0x%08x\n", instruction);
 
     // Inicializo un puntero que va a almacenar lo que me devuelva el hash
     instruction_info_t *info = NULL;
