@@ -63,6 +63,7 @@ void adds_extended_register( partition_t *instruction_data ) {
 }
 
 void process_instruction() {
+    printf( "entro a la funcion process_intstruction" );
     if ( instruction_table == NULL ) {
         printf( "hay que crear tabla" );
         init_instruction_table();
