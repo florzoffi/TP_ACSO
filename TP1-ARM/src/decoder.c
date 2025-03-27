@@ -8,14 +8,13 @@ uint16_t show( uint32_t instruction, int shift, uint32_t mask ){
     return ( instruction >> shift ) & mask;
 }
 
-void split_r(partition_t* parts, uint32_t instruction) {
-    parts->opcode = (instruction >> 21) & 0x7FF;  // Extrae bits 31-21
-    parts->rm = (instruction >> 16) & 0x1F;       // Extrae bits 20-16
-    parts->shamt = (instruction >> 10) & 0x3F;    // Extrae bits 15-10
-    parts->rn = (instruction >> 5) & 0x1F;        // Extrae bits 9-5
-    parts->rd = instruction & 0x1F;               // Extrae bits 4-0
+void split_r( partition_t* parts, uint32_t instruction ){
+    parts -> opcode = show( instruction, 21, 0x7FF );
+    parts -> rm = show( instruction, 16, 0x1F );
+    parts -> shamt = show( instruction, 10, 0x3F) ;
+    parts -> rn = show( instruction, 5, 0x1F );
+    parts -> rd = instruction & 0x1F;
 }
-
 
 void split_i( partition_t* parts, uint32_t instruction ){
     parts -> opcode = show( instruction, 22, 0x3FF );
