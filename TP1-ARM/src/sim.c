@@ -51,30 +51,17 @@ void init_instruction_table() {
         fprintf( stderr, "Error al crear el diccionario de instrucciones\n" );
         exit( 1 );
     }
-    ADD_INSTRUCTION( 0x1561, split_r, adds_extended_register, "Adds Extended Register" );
+    ADD_INSTRUCTION( 0x22C, split_r, adds_extended_register, "Adds Extended Register" );
     ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
 }
 
-void adds_extended_register( partition_t *instruction_data ) {
-    printf("Antes de ADDS:\n");
-    printf("Registro rn (X%d): 0x%" PRIx64 " (Valor: %" PRId64 ")\n", instruction_data->rn, CURRENT_STATE.REGS[instruction_data->rn], CURRENT_STATE.REGS[instruction_data->rn]);
-    printf("Registro rm (X%d): 0x%" PRIx64 " (Valor: %" PRId64 ")\n", instruction_data->rm, CURRENT_STATE.REGS[instruction_data->rm], CURRENT_STATE.REGS[instruction_data->rm]);
-    printf("Registro rd (X%d) [Destino antes]: 0x%" PRIx64 " (Valor: %" PRId64 ")\n", instruction_data->rd, CURRENT_STATE.REGS[instruction_data->rd], CURRENT_STATE.REGS[instruction_data->rd]);
-
-    uint64_t operand1 = CURRENT_STATE.REGS[instruction_data->rn];
-    uint64_t operand2 = CURRENT_STATE.REGS[instruction_data->rm];
-    uint64_t result = operand1 + operand2;
-    NEXT_STATE.FLAG_N = result >> 63;
-    NEXT_STATE.FLAG_Z = result == 0;
-    if (instruction_data->rd != XZR) {
-        NEXT_STATE.REGS[instruction_data->rd] = result;
+void adds_extended_register( partition_t *split_data ) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
+    NEXT_STATE.FLAG_N = operation >> 63;
+    NEXT_STATE.FLAG_Z = operation == 0;
+    if (split_data->rd != XZR) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
     }
-
-    // Imprimir estado después de la ejecución
-    printf("Después de adds:\n");
-    printf("Resultado en rd (X%d): 0x%" PRIx64 "\n", instruction_data->rd, NEXT_STATE.REGS[instruction_data->rd]);
-    printf("FLAG_N: %d\n", NEXT_STATE.FLAG_N);
-    printf("FLAG_Z: %d\n", NEXT_STATE.FLAG_Z);
 }
 
 void adds_immediate(partition_t *instruction_data) {
