@@ -81,6 +81,8 @@ void adds_immediate(partition_t *instruction_data) {
     uint64_t result = operand1 + imm;
     NEXT_STATE.FLAG_N = result >> 63;
     NEXT_STATE.FLAG_Z = result == 0;
+    NEXT_STATE.REGS[instruction_data->rd] = result;
+
 }
 
 void subs_extended_register(partition_t *instruction_data) {
