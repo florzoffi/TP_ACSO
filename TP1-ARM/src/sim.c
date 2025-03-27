@@ -8,7 +8,6 @@
 #include "shell.h"
 #include "hopscotch.h"
 #include "decoder.h"
-#include "sim.h"
 
 int BRANCH_OCCURRED = FALSE;
 
