@@ -117,8 +117,8 @@ void process_instruction() {
 
     // Ejecutar con la estructura decodificada
     dispatch:
-    info->decode( &splitted, instruction );   // split
-    info->execute( &splitted );              // ejecución
+    info->decode( &splitted, instruction );   
+    info->execute( &splitted );              
 
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
