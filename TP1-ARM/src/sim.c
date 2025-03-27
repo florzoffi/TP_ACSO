@@ -51,8 +51,8 @@ void init_instruction_table() {
         fprintf( stderr, "Error al crear el diccionario de instrucciones\n" );
         exit( 1 );
     }
-    ADD_INSTRUCTION( 0x2C4, split_r, adds_extended_register, "Adds Extended Register" );
-    ADD_INSTRUCTION( 0x588, split_i, adds_immediate, "Adds Immediate" );
+    ADD_INSTRUCTION( 0x1561, split_r, adds_extended_register, "Adds Extended Register" );
+    ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
 }
 
 void adds_extended_register( partition_t *instruction_data ) {
