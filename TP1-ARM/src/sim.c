@@ -23,7 +23,7 @@ char* uint32_to_string( uint32_t number ) {
     return key;
 }
 
-void ADD_INSTRUCTION( uint32_t opcode, void (*decode_fn)(partition_t*, uint32_t), void (*execute_fn)(partition_t*) execute_fn, const char* name_str ){ 
+void ADD_INSTRUCTION( uint32_t opcode, void (*decode_fn)(partition_t*, uint32_t), void (*execute_fn)(partition_t*), const char* name_str ){ 
     instruction_info_t *info = malloc( sizeof( instruction_info_t ) ); 
     if ( !info ) {
         fprintf( stderr, "Failed to allocate memory for instruction_info\n" );
