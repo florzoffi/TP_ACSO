@@ -59,7 +59,7 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0x6a2, split_i, hlt, "HLT" );
 
-    ADD_INSTRUCTION( 0xea, split_r, ands_shifted_register, "Ands Shifted Register" );
+    ADD_INSTRUCTION( 0x750, split_r, ands_shifted_register, "Ands Shifted Register" );
 
 }
 
