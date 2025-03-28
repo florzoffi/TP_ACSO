@@ -123,10 +123,26 @@ void hlt(partition_t *split_data) {
 }
 
 void ands_shifted_register(partition_t *split_data) {
-    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] & (CURRENT_STATE.REGS[split_data->rm]<< split_data->shamt);
-    NEXT_STATE.FLAG_N = (operation < 0);
-    NEXT_STATE.FLAG_Z = (operation == 0);
+    // Obtiene los valores de los registros basados en los índices especificados
+    uint64_t operand1 = CURRENT_STATE.REGS[split_data->rn];
+    uint64_t operand2 = CURRENT_STATE.REGS[split_data->rm];
+
+    // Aplica el desplazamiento especificado por shamt al segundo operando
+    operand2 <<= split_data->shamt;
+
+    // Realiza la operación AND bit a bit
+    uint64_t result = operand1 & operand2;
+
+    // Almacena el resultado en el registro especificado por rd, excepto si rd es un registro especial como XZR
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = result;
+    }
+
+    // Actualiza las banderas de estado
+    NEXT_STATE.FLAG_N = (result >> 63) & 1;  // El bit más significativo indica el signo
+    NEXT_STATE.FLAG_Z = (result == 0);       // True si el resultado es cero
 }
+
 
 void eor_shifted_register(partition_t *split_data) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] ^ CURRENT_STATE.REGS[split_data->rm];
