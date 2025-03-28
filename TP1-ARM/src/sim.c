@@ -57,14 +57,13 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0x758, split_r, subs_extended_register, "Subs Extended Register" );
     ADD_INSTRUCTION( 0xF1, split_i, subs_immediate, "Subs Immediate" );
 
-    ADD_INSTRUCTION( 0x6a2, split_iw, hlt, "HLT" );
+    ADD_INSTRUCTION( 0x6a2, split_iw, hlt, "HLT" ); // NO SE SI LA CORRI O NO
 
     ADD_INSTRUCTION( 0x750, split_r, ands_shifted_register, "Ands Shifted Register" );
 
     ADD_INSTRUCTION( 0xCA, split_r, eor_shifted_register, "Eor Shifted Register" );
 
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" );
-
 
 
 }
@@ -89,8 +88,9 @@ void adds_immediate(partition_t *split_data) {
         imm <<= 12;
     }
     uint64_t operataion = CURRENT_STATE.REGS[split_data->rn] + imm;
-    NEXT_STATE.FLAG_N = operataion >> 63;
-    NEXT_STATE.FLAG_Z = operataion == 0;
+    NEXT_STATE.FLAG_Z = (operataion == 0);
+    NEXT_STATE.FLAG_N = (operataion < 0);
+
     NEXT_STATE.REGS[split_data->rd] = operataion;
 }
 
