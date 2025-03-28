@@ -67,7 +67,7 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
 
-    ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
+   // ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
 
 }
 
@@ -181,7 +181,7 @@ void b_cond(partition_t *split_data) {
     }
 }
 
-
+/*
 void lsl_lsr_immediate(partition_t *split_data) {
     uint64_t immr = split_data->alu >> 6;
     uint64_t imms = split_data->alu & 0x3f;
@@ -193,6 +193,7 @@ void lsl_lsr_immediate(partition_t *split_data) {
     }
 }
 
+*/
 
 
 // --------------------------------------------------------------------------------------------
