@@ -65,6 +65,8 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" );
 
+     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
+
 
 }
 
@@ -147,8 +149,41 @@ void br_register(partition_t *split_data) {
     CURRENT_STATE.PC = CURRENT_STATE.REGS[split_data->rn];
 }
 
+void b_cond(partition_t *split_data) {
+   int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+   bool branch_allowed = false;
+   switch (split_data->rt) {
+       case 0:  // BEQ
+           branch_allowed = (CURRENT_STATE.FLAG_Z == 1);
+           break;
+       case 1:  // BNE
+           branch_allowed = (CURRENT_STATE.FLAG_Z == 0);
+           break;
+       case 11: // BLT
+           branch_allowed = (CURRENT_STATE.FLAG_N == 1);
+           break;
+       case 12: // BGT
+           branch_allowed = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
+           break;
+       case 10: // BGE
+           branch_allowed = (CURRENT_STATE.FLAG_N == 0);
+           break;
+       case 13: // BLE
+           branch_allowed = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
+           break;
+       default:
+           break;
+   }
 
+   if (branch_allowed) {
+       NEXT_STATE.PC = ( NEXT_STATE.PC + offset ) - 4;
+    }
+}
 
+/*void lsl_lsr(int rd, int rn, uint32_t shift_amount) {
+   NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rn] << shift_amount;
+   NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rn] >> shift_amount;
+}*/ //NO ESTA TERMIANDA
 
 
 // --------------------------------------------------------------------------------------------
