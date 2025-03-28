@@ -38,6 +38,15 @@ void br_register(partition_t* p);
 void b_cond(partition_t* p);
 void lsl_lsr_immediate(partition_t* p);
 
+void stur(partition_t* p);
+void sturb(partition_t* p);
+void sturh(partition_t* p);
+void ldur(partition_t* p);
+void ldurb(partition_t* p);
+void ldurh(partition_t* p);
+void movz(partition_t* p);
+
+
 
 void init_instruction_table();
 char* uint32_to_string( uint32_t number );

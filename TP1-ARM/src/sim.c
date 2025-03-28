@@ -54,24 +54,25 @@ void init_instruction_table() {
     }
     ADD_INSTRUCTION( 0x558, split_r, adds_extended_register, "Adds Extended Register" );
     ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-
     ADD_INSTRUCTION( 0x758, split_r, subs_extended_register, "Subs Extended Register" );
     ADD_INSTRUCTION( 0xF1, split_i, subs_immediate, "Subs Immediate" );
-
     ADD_INSTRUCTION( 0x6a2, split_iw, hlt, "HLT" ); // NO SE SI LA CORRI O NO
-
     ADD_INSTRUCTION( 0x750, split_r, ands_shifted_register, "Ands Shifted Register" );
-
     ADD_INSTRUCTION( 0xCA, split_r, eor_shifted_register, "Eor Shifted Register" );
-
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" ); // No la testee todavía
-
     ADD_INSTRUCTION( 0x5, split_b, b, "B Target" );
     ADD_INSTRUCTION( 0x6b0, split_r, br_register, "Br Register" );
-
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
-
     ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
+
+    ADD_INSTRUCTION( 0x7C0, split_d, stur, "STUR" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x1C0, split_d, sturb, "STURB" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x3C0, split_d, sturh, "STURH" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x7C2, split_d, ldur, "LDUR" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x3C2, split_d, ldurh, "LDURH" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x1C2, split_d, ldurb, "LDURB" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x694, split_iw, movz, "MOVZ" ); // No la testee todavia
+
 
 }
 
@@ -101,9 +102,7 @@ void adds_immediate(partition_t *split_data) {
 
     NEXT_STATE.REGS[split_data->rd] = operation;
     printf("Post-adds X2: %" PRId64 "\n", CURRENT_STATE.REGS[2]);
-    if (split_data->rd != 31) {
-        NEXT_STATE.REGS[split_data->rd] = operation;
-    }
+
 }
 
 void subs_extended_register(partition_t *split_data) {
@@ -204,15 +203,66 @@ void b_cond(partition_t *split_data) {
     }
 }
 
-
 void lsl_lsr_immediate(partition_t *split_data) {
     uint64_t immr = split_data->alu >> 6;
-    uint64_t imms = split_data->alu & 0x3f;
+    uint64_t imms = split_data->alu & 0x3F;
     if(imms != 0x3F){
         NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] << ( 64 - immr );
     }
     else{
         NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] >> immr;
+    }
+}
+
+void stur(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint64_t value = CURRENT_STATE.REGS[split_data->rt];
+    mem_write_32(address, value & 0xFFFFFFFF);
+    mem_write_32(address + 4, value >> 32);
+}
+
+void sturb(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint32_t value = CURRENT_STATE.REGS[split_data->rt] & 0xFF;
+    uint32_t mem = mem_read_32(value) & 0xFFFFFF00;
+    value = value | mem;
+    mem_write_32(address, value);
+}
+
+void sturh(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint64_t value = CURRENT_STATE.REGS[split_data->rt] & 0xFFFF;
+    uint64_t mem = mem_read_32(address) & 0xFFFF0000;
+    value = value | mem;
+    mem_write_32(address, value);
+}
+
+void ldur(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint32_t lower = mem_read_32(address);      
+    uint32_t upper = mem_read_32(address + 4); 
+    uint64_t value;
+    value = (uint64_t) upper;
+    value = ( value << 32 ) | lower;
+    NEXT_STATE.REGS[split_data->rt] = value;
+}
+
+void ldurh(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint32_t value = mem_read_32(address) & 0xFFFF; 
+    NEXT_STATE.REGS[split_data->rt] = value;
+}
+
+void ldurb(partition_t *split_data) {
+    uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
+    uint32_t value = mem_read_32(address) & 0xFF; 
+    NEXT_STATE.REGS[split_data->rt] = value;
+}
+
+void movz(partition_t *split_data) {
+    uint64_t value = split_data->mov; 
+    if (split_data->rd != 31){
+        NEXT_STATE.REGS[split_data->rd] = value;
     }
 }
 
