@@ -162,8 +162,6 @@ void print_flags() {
 
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-
-    // Asumiendo que split_data->rt es el código de condición
     switch (split_data->rt) {  
         case 0:  // BEQ
             printf("Pre-b_cond\n");
@@ -199,42 +197,6 @@ void b_cond(partition_t *split_data) {
         print_flags();  // Actualizar PC con el offset correctamente calculado
     }
 }
-/*
-void b_cond(partition_t *split_data) {
-    uint64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-    switch (split_data->rt) {
-        case 0x0: // BEQ
-            if (CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
-            break;
-        case 0x1: // BNE
-            if (!CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
-            break;
-        case 0xb: // BLT
-            if (CURRENT_STATE.FLAG_N) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
-            break;
-        case 0xc: // BGT
-            if (!CURRENT_STATE.FLAG_N && !CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
-            break;
-        case 0xd: // BLE
-            if (CURRENT_STATE.FLAG_N || CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
-            break;
-    }
-} */
 
 
 
@@ -321,8 +283,8 @@ void process_instruction() {
     // Ejecutar con la estructura decodificada
     dispatch:
     if (!info || !info->decode || !info->execute) {
-        printf("ERROR: info o sus punteros están en NULL\n");
-        exit(1);
+        printf("ERROR: info o sus punteros están en NULL. Skipping instruction.\n");
+        CURRENT_STATE.PC += 4;
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
@@ -334,4 +296,5 @@ void process_instruction() {
     }
     BRANCH_OCCURRED = false;    
     return;
+
 }
