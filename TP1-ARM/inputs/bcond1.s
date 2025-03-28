@@ -6,4 +6,4 @@ bne distinto
 movz x0, 0x0000   // no se ejecuta
 distinto:
 movz x0, 0x2222
-hlt
+HLT 0

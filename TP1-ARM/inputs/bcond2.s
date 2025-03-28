@@ -6,4 +6,4 @@ bgt mayor
 movz x0, 0x0000
 mayor:
 movz x0, 0x3333
-hlt
+HLT 0

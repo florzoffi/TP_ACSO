@@ -6,4 +6,4 @@ beq igual
 movz x0, 0x0000   // no se ejecuta
 igual:
 movz x0, 0x1111
-hlt
+HLT 0
