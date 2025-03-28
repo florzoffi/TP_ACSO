@@ -159,6 +159,7 @@ void print_flags() {
            CURRENT_STATE.FLAG_N);
 }
 
+/*
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     bool branch_allowed = false;
@@ -197,6 +198,51 @@ void b_cond(partition_t *split_data) {
         NEXT_STATE.PC += offset;
         printf("Post-branch_allowed\n");
         print_flags();  // Actualizar PC con el offset correctamente calculado
+    }
+}*/
+
+void pc_off_do (partition_t *split_data){
+    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+    NEXT_STATE.PC = NEXT_STATE.PC + offset;
+    NEXT_STATE.PC -= 4;
+    return;
+}
+
+/*
+    Esta función se encarga de realizar la operación de branch condicional.
+*/
+void b_cond(partition_t *split_data){
+    switch(split_data->cond_br){
+        case 0: //BEQ
+            if(NEXT_STATE.FLAG_Z){
+                pc_off_do(split_data);
+            }
+            break;
+        case 1: //BNE
+            if(!NEXT_STATE.FLAG_Z){
+                pc_off_do(split_data);
+            }
+            break;
+        case 12: //BGT, asumimos V = 0, entonces N debe ser 0, Z también 0.
+            if(!NEXT_STATE.FLAG_N && !NEXT_STATE.FLAG_Z){
+                pc_off_do(split_data);
+            }
+            break;
+        case 11: //BLT, asumimos V = 0, entonces N debe ser 1 (diferente).
+            if(NEXT_STATE.FLAG_N){
+                pc_off_do(split_data);
+            }
+            break;
+        case 10: //BGE, asumimos V = 0, entonces N debe ser 0.
+            if(!NEXT_STATE.FLAG_N){
+                pc_off_do(split_data);
+            }
+            break;
+        case 13: //BLE, O Z = 1 o N != V (si asumimos V = 0, entonces N debería ser 1)
+            if(NEXT_STATE.FLAG_N || NEXT_STATE.FLAG_Z){
+                pc_off_do(split_data);
+            }
+            break;
     }
 }
 
