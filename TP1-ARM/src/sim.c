@@ -285,6 +285,7 @@ void process_instruction() {
     if (!info || !info->decode || !info->execute) {
         printf("ERROR: info o sus punteros están en NULL. Skipping instruction.\n");
         CURRENT_STATE.PC += 4;
+        return;
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
