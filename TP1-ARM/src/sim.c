@@ -10,7 +10,6 @@
 #include "decoder.h"
 
 int BRANCH_OCCURRED = FALSE;
-int RUN_BIT = 1;
 int FLAG = FALSE;
 
 
