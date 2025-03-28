@@ -185,7 +185,7 @@ void lsl_lsr_immediate(partition_t *split_data) {
     uint64_t immr = split_data->alu >> 6;
     uint64_t imms = split_data->alu & 0x3f;
     if(imms != 0x3F){
-        NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] << 64 - immr;
+        NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] << ( 64 - immr );
     }
     else{
         NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] >> immr;
