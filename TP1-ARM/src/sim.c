@@ -85,31 +85,19 @@ void adds_extended_register( partition_t *split_data ) {
     NEXT_STATE.FLAG_Z = operation == 0;
     NEXT_STATE.REGS[split_data->rd] = operation;
 }
-void adds_immediate(partition_t *split_data) {
-    // Debugging antes de la operación
-    printf("Pre-adds rn: %" PRId64 " (X%d), Immediate: 10, shamt: %d\n", 
-           CURRENT_STATE.REGS[split_data->rn], split_data->rn, split_data->shamt);
-    uint64_t imm = split_data->alu;
-    printf("Original imm value: %" PRId64 "\n", imm);
 
-    // Aplicar shamt si es necesario
+void adds_immediate(partition_t *split_data) {
+    printf("Pre-adds X0: %" PRId64 ", Immediate: 10\n", CURRENT_STATE.REGS[0]);
+    uint64_t imm = split_data->alu;
     if (split_data->shamt == 0x1) {
         imm <<= 12;
-        printf("Modified imm value after shift: %" PRId64 "\n", imm);
     }
-
-    // Realizar la suma
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + imm;
-    printf("Operation result: %" PRId64 "\n", operation);
-
-    // Actualizar banderas
     NEXT_STATE.FLAG_Z = (operation == 0);
     NEXT_STATE.FLAG_N = (operation < 0);
-    printf("FLAGS - Z: %d, N: %d\n", NEXT_STATE.FLAG_Z, NEXT_STATE.FLAG_N);
 
-    // Guardar resultado en el registro destino
     NEXT_STATE.REGS[split_data->rd] = operation;
-    printf("Post-adds X%d: %" PRId64 "\n", split_data->rd, NEXT_STATE.REGS[split_data->rd]);
+    printf("Post-adds X2: %" PRId64 "\n", CURRENT_STATE.REGS[2]);
 }
 
 void subs_extended_register(partition_t *split_data) {
