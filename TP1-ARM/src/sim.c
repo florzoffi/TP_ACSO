@@ -113,7 +113,7 @@ void subs_immediate(partition_t *split_data) {
     }
 }
 
-void hlt() {
+void hlt(partition_t *split_data) {
     RUN_BIT = 0;
 }
 
@@ -147,8 +147,6 @@ void br_register(partition_t *split_data) {
 
 
 // --------------------------------------------------------------------------------------------
-
-
 
 void lazy_innit_hash() {
     printf( "entro a la funcion process_intstruction" );
