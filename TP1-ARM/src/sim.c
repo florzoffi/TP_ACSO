@@ -201,50 +201,42 @@ void b_cond(partition_t *split_data) {
     }
 }*/
 
-void pc_off_do (partition_t *split_data){
-    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-    NEXT_STATE.PC = NEXT_STATE.PC + offset;
-    NEXT_STATE.PC -= 4;
-    return;
-}
-
-/*
-    Esta función se encarga de realizar la operación de branch condicional.
-*/
-void b_cond(partition_t *split_data){
-    switch(split_data->cond_br){
-        case 0: //BEQ
-            if(NEXT_STATE.FLAG_Z){
-                pc_off_do(split_data);
+void b_cond(partition_t *split_data) {
+    uint64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+    switch (split_data->rt) {
+        case 0x0: // BEQ
+            if (CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
             }
             break;
-        case 1: //BNE
-            if(!NEXT_STATE.FLAG_Z){
-                pc_off_do(split_data);
+        case 0x1: // BNE
+            if (!CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
             }
             break;
-        case 12: //BGT, asumimos V = 0, entonces N debe ser 0, Z también 0.
-            if(!NEXT_STATE.FLAG_N && !NEXT_STATE.FLAG_Z){
-                pc_off_do(split_data);
+        case 0xb: // BLT
+            if (CURRENT_STATE.FLAG_N) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
             }
             break;
-        case 11: //BLT, asumimos V = 0, entonces N debe ser 1 (diferente).
-            if(NEXT_STATE.FLAG_N){
-                pc_off_do(split_data);
+        case 0xc: // BGT
+            if (!CURRENT_STATE.FLAG_N && !CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
             }
             break;
-        case 10: //BGE, asumimos V = 0, entonces N debe ser 0.
-            if(!NEXT_STATE.FLAG_N){
-                pc_off_do(split_data);
-            }
-            break;
-        case 13: //BLE, O Z = 1 o N != V (si asumimos V = 0, entonces N debería ser 1)
-            if(NEXT_STATE.FLAG_N || NEXT_STATE.FLAG_Z){
-                pc_off_do(split_data);
+        case 0xd: // BLE
+            if (CURRENT_STATE.FLAG_N || CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
             }
             break;
     }
 }
+
 
 
 /*
