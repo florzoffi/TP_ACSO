@@ -151,36 +151,37 @@ void br_register(partition_t *split_data) {
 }
 
 void b_cond(partition_t *split_data) {
-   uint64_t offset = sign_extend(split_data->cond_br << 2, 21);
+    uint64_t offset = sign_extend(split_data->cond_br << 2, 21);
+    bool condition = FALSE;
     switch (split_data->rt) {
         case 0x0: // BEQ
             if (CURRENT_STATE.FLAG_Z) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
+                condition = TRUE;
             }
             break;
         case 0x1: // BNE
             if (!CURRENT_STATE.FLAG_Z) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
+                condition = TRUE;
             }
             break;
         case 0xb: // BLT
             if (CURRENT_STATE.FLAG_N) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
+                condition = TRUE;
             }
             break;
         case 0xc: // BGT
             if (!CURRENT_STATE.FLAG_N && !CURRENT_STATE.FLAG_Z) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
+                condition = TRUE;
             }
             break;
         case 0xd: // BLE
             if (CURRENT_STATE.FLAG_N || CURRENT_STATE.FLAG_Z) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
+                condition = TRUE;
             }
             break;
     }
