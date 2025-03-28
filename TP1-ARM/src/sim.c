@@ -151,7 +151,7 @@ void br_register(partition_t *split_data) {
 }
 
 void b_cond(partition_t *split_data) {
-    uint64_t offset = sign_extend(split_data->cond_br << 2, 21);
+    uint64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     switch (split_data->rt) {
         case 0x0: // BEQ
             if (CURRENT_STATE.FLAG_Z) {
