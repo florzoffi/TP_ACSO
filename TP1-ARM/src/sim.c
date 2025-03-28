@@ -54,7 +54,7 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0x558, split_r, adds_extended_register, "Adds Extended Register" );
     ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
 
-    ADD_INSTRUCTION( 0x1D64, split_i, subs_extended_register, "Subs Extended Register" );
+    ADD_INSTRUCTION( 0x6B1, split_i, subs_extended_register, "Subs Extended Register" );
     ADD_INSTRUCTION( 0xF1, split_r, subs_immediate, "Subs Immediate" );
 
     ADD_INSTRUCTION( 0x6a2, split_i, hlt, "HLT" );
