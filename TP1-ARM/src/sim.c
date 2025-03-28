@@ -151,7 +151,7 @@ void br_register(partition_t *split_data) {
 }
 
 void print_flags() {
-    printf("FLAGS - Z: %d, N: %d, C: %d, V: %d\n",
+    printf("FLAGS - Z: %d, N: %d, ",
            CURRENT_STATE.FLAG_Z,
            CURRENT_STATE.FLAG_N);
 }
