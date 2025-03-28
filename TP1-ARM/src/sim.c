@@ -10,8 +10,9 @@
 #include "decoder.h"
 
 int BRANCH_OCCURRED = FALSE;
+int RUN_BIT = 1;
+int FLAG = FALSE;
 
-#define XZR 0x1f
 
 static dictionary_t *instruction_table = NULL;
 
@@ -51,20 +52,24 @@ void init_instruction_table() {
         fprintf( stderr, "Error al crear el diccionario de instrucciones\n" );
         exit( 1 );
     }
-    ADD_INSTRUCTION( 0x1563, split_r, adds_extended_register, "Adds Extended Register" );
+    ADD_INSTRUCTION( 0x1561, split_r, adds_extended_register, "Adds Extended Register" );
     ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
 
-    //ADD_INSTRUCTION( 0xB1, split_i, subs_extended_register, "Subs Extended Register" );
-    // ADD_INSTRUCTION( 0xB1, split_i, subs_immediate, "Subs Immediate" );
-    //ADD_INSTRUCTION( 0x6a2, split_i, hlt, "HLT" );
+    ADD_INSTRUCTION( 0x1D64, split_i, subs_extended_register, "Subs Extended Register" );
+    ADD_INSTRUCTION( 0xF1, split_r, subs_immediate, "Subs Immediate" );
 
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
-    // ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
+    ADD_INSTRUCTION( 0x6a2, split_i, hlt, "HLT" );
+
+    ADD_INSTRUCTION( 0xea, split_r, ands_shifted_register, "Ands Shifted Register" );
+
 }
+
+int32_t adjust_sign(uint32_t value, int bits) {
+    int32_t sign_bit = 1 << (bits - 1);
+    return (value ^ sign_bit) - sign_bit;
+}
+
+// ----------------------------------- Funciones de Instrucciones ---------------------------------------------------------
 
 void adds_extended_register( partition_t *split_data ) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
@@ -73,31 +78,75 @@ void adds_extended_register( partition_t *split_data ) {
     NEXT_STATE.REGS[split_data->rd] = operation;
 }
 
-void adds_immediate(partition_t *instruction_data) {
-    uint64_t imm = instruction_data->alu;
-    if (instruction_data->shamt == 0x1) {
+void adds_immediate(partition_t *split_data) {
+    uint64_t imm = split_data->alu;
+    if (split_data->shamt == 0x1) {
         imm <<= 12;
     }
-    uint64_t operataion = CURRENT_STATE.REGS[instruction_data->rn] + imm;
+    uint64_t operataion = CURRENT_STATE.REGS[split_data->rn] + imm;
     NEXT_STATE.FLAG_N = operataion >> 63;
     NEXT_STATE.FLAG_Z = operataion == 0;
-    NEXT_STATE.REGS[instruction_data->rd] = operataion;
-
+    NEXT_STATE.REGS[split_data->rd] = operataion;
 }
 
-void subs_extended_register(partition_t *instruction_data) {
+void subs_extended_register(partition_t *split_data) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] - CURRENT_STATE.REGS[split_data->rm];
+    NEXT_STATE.FLAG_N = (operation >> 63) & 1;
+    NEXT_STATE.FLAG_Z = (operation == 0);
+    NEXT_STATE.REGS[split_data->rd] = operation;
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
+}
+
+void subs_immediate(partition_t *split_data) {
+    uint64_t imm = split_data->alu;
+    if (split_data->shamt == 0x1) {
+        imm <<= 12;
+    }
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] - imm;
+    NEXT_STATE.FLAG_N = (operation >> 63) & 1;
+    NEXT_STATE.FLAG_Z = (operation == 0);
+    NEXT_STATE.REGS[split_data->rd] = operation;
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
+}
+
+void hlt() {
+    RUN_BIT = 0;
+}
+
+void ands_shifted_register(partition_t *split_data) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] & CURRENT_STATE.REGS[split_data->rm];
+    NEXT_STATE.FLAG_N = operation >> 63;
+    NEXT_STATE.FLAG_Z = operation == 0;
+}
+
+void eor_shifted_register(partition_t *split_data) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] ^ CURRENT_STATE.REGS[split_data->rm];
+    NEXT_STATE.REGS[split_data->rd] = operation;
+}
+
+void orr_shifted_register(partition_t *split_data) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] | CURRENT_STATE.REGS[split_data->rm];
+    NEXT_STATE.REGS[split_data->rd] = operation;
+}
+
+void b(partition_t *split_data) {
+    NEXT_STATE.PC = CURRENT_STATE.PC + adjust_sign(split_data->br << 2, 28);
+    FLAG = TRUE;
+}
+
+void br_register(partition_t *split_data) {
+    CURRENT_STATE.PC = CURRENT_STATE.REGS[split_data->rn];
 }
 
 
 
 
 
-
-
-
-
-
-
+// --------------------------------------------------------------------------------------------
 
 
 
