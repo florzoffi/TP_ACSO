@@ -24,6 +24,7 @@ typedef struct {
     char *name;
 } instruction_info_t;
 
+
 void adds_extended_register(partition_t* p);
 void adds_immediate(partition_t* p);
 void subs_extended_register(partition_t* p);

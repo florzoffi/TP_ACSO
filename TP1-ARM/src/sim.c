@@ -101,6 +101,9 @@ void adds_immediate(partition_t *split_data) {
 
     NEXT_STATE.REGS[split_data->rd] = operation;
     printf("Post-adds X2: %" PRId64 "\n", CURRENT_STATE.REGS[2]);
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
 }
 
 void subs_extended_register(partition_t *split_data) {
