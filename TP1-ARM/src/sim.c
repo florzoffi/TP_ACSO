@@ -283,9 +283,8 @@ void process_instruction() {
     // Ejecutar con la estructura decodificada
     dispatch:
     if (!info || !info->decode || !info->execute) {
-        printf("ERROR: info o sus punteros están en NULL. Skipping instruction.\n");
-        CURRENT_STATE.PC += 4;
-        return;
+        printf("ERROR: info o sus punteros están en NULL\n");
+        exit(1);
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
