@@ -67,7 +67,7 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
 
-    //ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
 
 }
 
@@ -151,7 +151,7 @@ void br_register(partition_t *split_data) {
 }
 
 void b_cond(partition_t *split_data) {
-    uint64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+   uint64_t offset = sign_extend(split_data->cond_br << 2, 21);
     switch (split_data->rt) {
         case 0x0: // BEQ
             if (CURRENT_STATE.FLAG_Z) {
@@ -186,7 +186,6 @@ void b_cond(partition_t *split_data) {
     }
 }
 
-/*
 void lsl_lsr_immediate(partition_t *split_data) {
     uint64_t immr = split_data->alu >> 6;
     uint64_t imms = split_data->alu & 0x3f;
@@ -197,8 +196,6 @@ void lsl_lsr_immediate(partition_t *split_data) {
         NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] >> immr;
     }
 }
-
-*/
 
 
 
