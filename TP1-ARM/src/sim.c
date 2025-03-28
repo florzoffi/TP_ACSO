@@ -159,48 +159,47 @@ void print_flags() {
            CURRENT_STATE.FLAG_N);
 }
 
-/*
+
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-    bool branch_allowed = false;
 
     // Asumiendo que split_data->rt es el código de condición
     switch (split_data->rt) {  
         case 0:  // BEQ
             printf("Pre-b_cond\n");
             print_flags();
-            branch_allowed = (CURRENT_STATE.FLAG_Z == 1);
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
             printf("Post-b_cond\n");
             print_flags();
             break;
         case 1:  // BNE
-            branch_allowed = (CURRENT_STATE.FLAG_Z == 0);
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 0);
             break;
         case 11: // BLT
-            branch_allowed = (CURRENT_STATE.FLAG_N == 1);
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1);
             break;
         case 12: // BGT
-            branch_allowed = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
+            BRANCH_OCCURRED = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
             break;
         case 10: // BGE
-            branch_allowed = (CURRENT_STATE.FLAG_N == 0);
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0);
             break;
         case 13: // BLE
-            branch_allowed = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
             break;
         default:
             break;
     }
 
-    if (branch_allowed) {
+    if (BRANCH_OCCURRED) {
         printf("Pre-branch_allowed\n");
         print_flags();
         NEXT_STATE.PC += offset;
         printf("Post-branch_allowed\n");
         print_flags();  // Actualizar PC con el offset correctamente calculado
     }
-}*/
-
+}
+/*
 void b_cond(partition_t *split_data) {
     uint64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     switch (split_data->rt) {
@@ -235,7 +234,7 @@ void b_cond(partition_t *split_data) {
             }
             break;
     }
-}
+} */
 
 
 
