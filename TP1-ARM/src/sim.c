@@ -61,6 +61,9 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0x750, split_r, ands_shifted_register, "Ands Shifted Register" );
 
+    ADD_INSTRUCTION( 0xCA, split_r, eor_shifted_register, "Eor Shifted Register" );
+
+
 }
 
 int32_t adjust_sign(uint32_t value, int bits) {
