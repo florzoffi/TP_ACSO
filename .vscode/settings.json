@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "stdbool.h": "c",
+        "stdint.h": "c",
+        "__node_handle": "c",
+        "assert.h": "c",
+        "shell.h": "c"
+    }
+}

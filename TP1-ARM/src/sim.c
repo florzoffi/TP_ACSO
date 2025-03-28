@@ -63,7 +63,7 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0xCA, split_r, eor_shifted_register, "Eor Shifted Register" );
 
-    ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" );
+    ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" ); // No la testee todavía
 
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
 
