@@ -151,33 +151,38 @@ void br_register(partition_t *split_data) {
 }
 
 void b_cond(partition_t *split_data) {
-   int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-   bool branch_allowed = false;
-   switch (split_data->rt) {
-       case 0:  // BEQ
-           branch_allowed = (CURRENT_STATE.FLAG_Z == 1);
-           break;
-       case 1:  // BNE
-           branch_allowed = (CURRENT_STATE.FLAG_Z == 0);
-           break;
-       case 11: // BLT
-           branch_allowed = (CURRENT_STATE.FLAG_N == 1);
-           break;
-       case 12: // BGT
-           branch_allowed = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
-           break;
-       case 10: // BGE
-           branch_allowed = (CURRENT_STATE.FLAG_N == 0);
-           break;
-       case 13: // BLE
-           branch_allowed = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
-           break;
-       default:
-           break;
-   }
-
-   if (branch_allowed) {
-       NEXT_STATE.PC = ( NEXT_STATE.PC + offset ) - 4;
+    uint64_t offset = sign_extend(split_data->cond_br << 2, 21);
+    switch (split_data->rt) {
+        case 0x0: // BEQ
+            if (CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
+            }
+            break;
+        case 0x1: // BNE
+            if (!CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
+            }
+            break;
+        case 0xb: // BLT
+            if (CURRENT_STATE.FLAG_N) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
+            }
+            break;
+        case 0xc: // BGT
+            if (!CURRENT_STATE.FLAG_N && !CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
+            }
+            break;
+        case 0xd: // BLE
+            if (CURRENT_STATE.FLAG_N || CURRENT_STATE.FLAG_Z) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+                BRANCH_OCCURRED = TRUE;
+            }
+            break;
     }
 }
 
