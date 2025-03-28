@@ -66,6 +66,9 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" ); // No la testee todavía
 
+    ADD_INSTRUCTION( 0x5, split_b, b, "B Target" );
+    ADD_INSTRUCTION( 0x6b0, split_r, br_register, "Br Register" );
+
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
 
     ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
