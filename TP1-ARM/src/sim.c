@@ -157,7 +157,9 @@ void b_cond(partition_t *split_data) {
     // Asumiendo que split_data->rt es el código de condición
     switch (split_data->rt) {  
         case 0:  // BEQ
+            printf("ENTRO BEQ\n");
             branch_allowed = (CURRENT_STATE.FLAG_Z == 1);
+            printf("SALIO BEQ\n");
             break;
         case 1:  // BNE
             branch_allowed = (CURRENT_STATE.FLAG_Z == 0);
