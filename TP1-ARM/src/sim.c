@@ -189,7 +189,11 @@ void b_cond(partition_t *split_data) {
     }
 
     if (branch_allowed) {
-        NEXT_STATE.PC += offset;  // Actualizar PC con el offset correctamente calculado
+        printf("Pre-branch_allowed\n");
+        print_flags();
+        NEXT_STATE.PC += offset;
+        printf("Post-branch_allowed\n");
+        print_flags();  // Actualizar PC con el offset correctamente calculado
     }
 }
 
