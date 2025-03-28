@@ -65,8 +65,9 @@ void init_instruction_table() {
 
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" );
 
-     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
+    ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
 
+    ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
 
 }
 
@@ -180,10 +181,17 @@ void b_cond(partition_t *split_data) {
     }
 }
 
-/*void lsl_lsr(int rd, int rn, uint32_t shift_amount) {
-   NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rn] << shift_amount;
-   NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rn] >> shift_amount;
-}*/ //NO ESTA TERMIANDA
+void lsl_lsr_immediate(partition_t *split_data) {
+    uint64_t immr = split_data->alu >> 6;
+    uint64_t imms = split_data->alu & 0x3f;
+    if(imms != 0x3F){
+        NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] << 64 - immr;
+    }
+    else{
+        NEXT_STATE.REGS[split_data->rd] = NEXT_STATE.REGS[split_data->rn] >> immr;
+    }
+}
+
 
 
 // --------------------------------------------------------------------------------------------
