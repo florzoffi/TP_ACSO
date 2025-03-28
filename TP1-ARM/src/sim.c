@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #include "shell.h"
 #include "hopscotch.h"
@@ -86,7 +87,7 @@ void adds_extended_register( partition_t *split_data ) {
 }
 
 void adds_immediate(partition_t *split_data) {
-    printf("Pre-adds X0: %llu, Immediate: 10\n", CURRENT_STATE.REGS[0]);
+    printf("Pre-adds X0: %" PRId64 ", Immediate: 10\n", CURRENT_STATE.REGS[0]);
     uint64_t imm = split_data->alu;
     if (split_data->shamt == 0x1) {
         imm <<= 12;
@@ -96,7 +97,7 @@ void adds_immediate(partition_t *split_data) {
     NEXT_STATE.FLAG_N = (operation < 0);
 
     NEXT_STATE.REGS[split_data->rd] = operation;
-    printf("Post-adds X2: %llu\n", CURRENT_STATE.REGS[2]);
+    printf("Post-adds X2: %" PRId64 "\n", CURRENT_STATE.REGS[2]);
 }
 
 void subs_extended_register(partition_t *split_data) {
