@@ -35,7 +35,7 @@ void orr_shifted_register(partition_t* p);
 void b(partition_t* p);
 void br_register(partition_t* p);
 void b_cond(partition_t* p);
-
+void lsl_lsr_immediate(partition_t* p);
 
 
 void init_instruction_table();
