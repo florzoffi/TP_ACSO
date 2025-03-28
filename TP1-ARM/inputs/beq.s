@@ -10,4 +10,5 @@ foo:
 cmp X11, X11
 beq bar
 adds X3, X0, 10
+
 HLT 0
