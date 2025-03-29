@@ -142,7 +142,6 @@ void subs_immediate(partition_t *split_data) {
 void hlt(partition_t *split_data) {
     RUN_BIT = 0;
     printf("Simulator halted\n\n");
-
 }
 
 void ands_shifted_register(partition_t *split_data) {
@@ -182,6 +181,9 @@ void print_flags() {
 
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+    printf("Extracted opcode_cb: %d\n", split_data->opcode);
+    printf("Offset to apply: %lld\n", offset);
+    printf("Pre-b_cond Current PC: %08x\n", CURRENT_STATE.PC);
     switch (split_data->rt) {  
         case 0:  // BEQ
             printf("Extracted opcode_cb: %d\n", split_data->opcode );
@@ -211,11 +213,11 @@ void b_cond(partition_t *split_data) {
     }
 
     if (BRANCH_OCCURRED) {
-        printf("Pre-branch_allowed\n");
-        print_flags();
+        printf("Branch condition met. Adjusting PC.\n");
         NEXT_STATE.PC += offset;
-        printf("Post-branch_allowed\n");
-        print_flags();  // Actualizar PC con el offset correctamente calculado
+        printf("New PC after branch: %08x\n", NEXT_STATE.PC);
+    } else {
+        printf("Branch condition not met.\n");
     }
 }
 
