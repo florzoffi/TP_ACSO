@@ -393,12 +393,12 @@ void process_instruction() {
     // Ejecutar con la estructura decodificada
     dispatch:
     if (!info || !info->decode || !info->execute) {
+        printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         if (!BRANCH_OCCURRED) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + 4;
             } else {
                 BRANCH_OCCURRED = FALSE;
             }
-        printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         exit(EXIT_FAILURE);
     }
     printf( "empieza el split" );
