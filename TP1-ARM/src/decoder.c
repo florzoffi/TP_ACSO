@@ -43,7 +43,7 @@ void split_cb( partition_t* parts, uint32_t instruction ){
 }
 
 void split_iw( partition_t* parts, uint32_t instruction ){
-    parts-> opcode = show( instruction, 23, 0x7FF );
+    parts-> opcode = show( instruction, 21, 0x7FF );
     parts-> mov = show( instruction, 5, 0x3FFFF );
     parts-> rd = instruction & 0x1F;
 }
