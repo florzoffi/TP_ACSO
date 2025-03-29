@@ -176,12 +176,13 @@ void orr_shifted_register(partition_t *split_data) {
 }
 
 void b(partition_t *split_data) {
-    NEXT_STATE.PC = CURRENT_STATE.PC + adjust_sign(split_data->br << 2, 28);
+    int64_t offset = adjust_sign(split_data->br << 2, 28);
+    NEXT_STATE.PC = CURRENT_STATE.PC + offset;
     BRANCH_OCCURRED = TRUE;
 }
 
 void br_register(partition_t *split_data) {
-    CURRENT_STATE.PC = CURRENT_STATE.REGS[split_data->rn];
+    NEXT_STATE.PC = CURRENT_STATE.REGS[split_data->rn];
     BRANCH_OCCURRED = TRUE;
 }
 
@@ -231,8 +232,7 @@ void print_flags() {
 //}
 
 void b_cond(partition_t *split_data) {
-    // Sign-extend imm19 and apply <<2
-    int32_t offset = ((int32_t)(split_data->cond_br << 13)) >> 11;
+    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
 
     bool condition_met = false;
 
@@ -272,10 +272,10 @@ void stur(partition_t *split_data) {
 
 void sturb(partition_t *split_data) {
     uint64_t address = CURRENT_STATE.REGS[split_data->rn] + adjust_sign(split_data->dt, 9);
-    uint32_t value = CURRENT_STATE.REGS[split_data->rt] & 0xFF;
-    uint32_t mem = mem_read_32(value) & 0xFFFFFF00;
-    value = value | mem;
-    mem_write_32(address, value);
+    uint8_t value = CURRENT_STATE.REGS[split_data->rt] & 0xFF;
+    uint32_t mem = mem_read_32(address) & 0xFFFFFF00;
+    uint32_t final = value | mem;
+    mem_write_32(address, final);
 }
 
 void sturh(partition_t *split_data) {
@@ -345,16 +345,16 @@ void mul_register(partition_t *split_data) {
 }
 
 void cbz(partition_t *split_data) {
+    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     if (CURRENT_STATE.REGS[split_data->rt] == 0) {
-        int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
         NEXT_STATE.PC = CURRENT_STATE.PC + offset;
         BRANCH_OCCURRED = TRUE;
     }
 }
 
 void cbnz(partition_t *split_data) {
+    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     if (CURRENT_STATE.REGS[split_data->rt] != 0) {
-        int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
         NEXT_STATE.PC = CURRENT_STATE.PC + offset;
         BRANCH_OCCURRED = TRUE;
     }
@@ -424,20 +424,14 @@ void process_instruction() {
     if (!info || !info->decode || !info->execute) {
         printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         if (!BRANCH_OCCURRED) {
-            printf( "Entro a !BRANCH" );
             NEXT_STATE.PC = CURRENT_STATE.PC + 4;
             return;
-            printf( "Ejecuto a !BRANCH" );
         } else {
-            printf( "Entro a BRANCH" );
             BRANCH_OCCURRED = FALSE;
-            printf( "Entro a BRANCH" );
         }
         exit(EXIT_FAILURE);
     }
-    printf( "empieza el split" );
     info->decode( &splitted, instruction );  
-    printf( "empueza el execute" ); 
     info->execute( &splitted );              
 
     if (!BRANCH_OCCURRED){ 
