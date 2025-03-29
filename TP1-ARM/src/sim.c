@@ -11,7 +11,6 @@
 #include "decoder.h"
 
 int BRANCH_OCCURRED = FALSE;
-int FLAG = FALSE;
 
 static dictionary_t *instruction_table = NULL;
 
@@ -165,7 +164,7 @@ void orr_shifted_register(partition_t *split_data) {
 
 void b(partition_t *split_data) {
     NEXT_STATE.PC = CURRENT_STATE.PC + adjust_sign(split_data->br << 2, 28);
-    FLAG = TRUE;
+    BRANCH_OCCURRED = TRUE;
 }
 
 void br_register(partition_t *split_data) {
@@ -395,7 +394,13 @@ void process_instruction() {
     dispatch:
     if (!info || !info->decode || !info->execute) {
         printf("ERROR: info o sus punteros están en NULL\n");
-        exit(1);
+        if (!BRANCH_OCCURRED) {
+                NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+            } else {
+                BRANCH_OCCURRED = FALSE;
+            }
+
+            return;
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
