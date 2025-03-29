@@ -235,14 +235,27 @@ void b_cond(partition_t *split_data) {
 
     bool condition_met = false;
 
-    switch (split_data->rt) {
-        case 0:  condition_met = (CURRENT_STATE.FLAG_Z == 1); break; // BEQ
-        case 1:  condition_met = (CURRENT_STATE.FLAG_Z == 0); break; // BNE
-        case 11: condition_met = (CURRENT_STATE.FLAG_N == 1); break; // BLT
-        case 12: condition_met = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0); break; // BGT
-        case 10: condition_met = (CURRENT_STATE.FLAG_N == 0); break; // BGE
-        case 13: condition_met = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1); break; // BLE
-        default: break;
+    switch (split_data->rt) {  
+        case 0:  // BEQ
+            condition_met = (CURRENT_STATE.FLAG_Z == 1);
+            break;
+        case 1:  // BNE
+            condition_met = (CURRENT_STATE.FLAG_Z == 0);
+            break;
+        case 11: // BLT
+            condition_met = (CURRENT_STATE.FLAG_N == 1);
+            break;
+        case 12: // BGT
+            condition_met = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
+            break;
+        case 10: // BGE
+            condition_met = (CURRENT_STATE.FLAG_N == 0);
+            break;
+        case 13: // BLE
+            condition_met = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
+            break;
+        default:
+            break;
     }
 
     if (condition_met) {
