@@ -397,6 +397,7 @@ void process_instruction() {
         if (!BRANCH_OCCURRED) {
             printf( "Entro a !BRANCH" );
             NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+            return;
             printf( "Ejecuto a !BRANCH" );
         } else {
             printf( "Entro a BRANCH" );
