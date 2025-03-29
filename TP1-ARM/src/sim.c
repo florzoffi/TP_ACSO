@@ -11,6 +11,7 @@
 #include "decoder.h"
 
 int BRANCH_OCCURRED = FALSE;
+int64_t offset_global = 0;
 
 static dictionary_t *instruction_table = NULL;
 
@@ -202,6 +203,7 @@ void b_cond(partition_t *split_data) {
             printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             print_flags();
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
+            offset_global = offset;
             printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             printf("Post-b_cond\n");
             print_flags();
@@ -422,8 +424,10 @@ void process_instruction() {
 
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+    } else {
+        NEXT_STATE.PC = CURRENT_STATE.PC + offset_global;
+        offset_global = 0;
     }
-    NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     BRANCH_OCCURRED = FALSE;   
     return;
 }
