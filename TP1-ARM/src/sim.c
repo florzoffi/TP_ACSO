@@ -423,7 +423,7 @@ void process_instruction() {
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
-    BRANCH_OCCURRED = FALSE;   
     NEXT_STATE.PC = CURRENT_STATE.PC; 
+    BRANCH_OCCURRED = FALSE;   
     return;
 }
