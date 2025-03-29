@@ -197,16 +197,18 @@ void b_cond(partition_t *split_data) {
     printf("New PC after branch: %08" PRIx64 "\n", NEXT_STATE.PC);
     switch (split_data->rt) {  
         case 0:  // BEQ
-            if (CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
+            printf("Extracted opcode_cb: %d\n", split_data->opcode );
+            printf("Pre-b_cond\n");
+            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+            print_flags();
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
+            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+            printf("Post-b_cond\n");
+            print_flags();
             break;
         case 1:  // BNE
-            if (!CURRENT_STATE.FLAG_Z) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-                BRANCH_OCCURRED = TRUE;
-            }
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 0);
+            break;
         case 11: // BLT
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1);
             break;
@@ -421,6 +423,7 @@ void process_instruction() {
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
-    BRANCH_OCCURRED = FALSE;    
+    BRANCH_OCCURRED = FALSE;   
+    NEXT_STATE.PC = CURRENT_STATE.PC + 4; 
     return;
 }
