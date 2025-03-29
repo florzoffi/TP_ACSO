@@ -140,6 +140,9 @@ void ands_shifted_register(partition_t *split_data) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] & CURRENT_STATE.REGS[split_data->rm];
     NEXT_STATE.FLAG_N = operation >> 63;
     NEXT_STATE.FLAG_Z = operation == 0;
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
 }
 
 void eor_shifted_register(partition_t *split_data) {
