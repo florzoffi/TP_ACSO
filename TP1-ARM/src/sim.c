@@ -232,7 +232,7 @@ void print_flags() {
 //}
 
 void b_cond(partition_t *split_data) {
-    int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+    int32_t offset = ((int32_t)(split_data->cond_br << 13)) >> 11;
 
     bool condition_met = false;
 
