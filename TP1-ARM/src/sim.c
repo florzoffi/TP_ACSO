@@ -13,7 +13,6 @@
 int BRANCH_OCCURRED = FALSE;
 int FLAG = FALSE;
 
-
 static dictionary_t *instruction_table = NULL;
 
 char* uint32_to_string( uint32_t number ) {
@@ -396,5 +395,4 @@ void process_instruction() {
     }
     BRANCH_OCCURRED = false;    
     return;
-
 }
