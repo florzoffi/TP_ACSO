@@ -78,10 +78,16 @@ void init_instruction_table() {
     ADD_INSTRUCTION(0xB5, split_cb, cbnz, "CBNZ");
 }
 
+
+int64_t adjust_sign(uint32_t value, int bits) {
+    int64_t offset = (int64_t)(value << (64 - bits)) >> (64 - bits); // Sign-extend the value
+    return offset;
+}
+/*
 int32_t adjust_sign(uint32_t value, int bits) {
     int32_t sign_bit = 1 << (bits - 1);
     return (value ^ sign_bit) - sign_bit;
-}
+}*/
 
 // ----------------------------------- Funciones de Instrucciones ---------------------------------------------------------
 
@@ -213,6 +219,8 @@ void b_cond(partition_t *split_data) {
     }
 
     if (BRANCH_OCCURRED) {
+        printf("Offset to apply: %ld\n", offset);
+        printf("Current PC: %08lx\n", CURRENT_STATE.PC);
         printf("Branch condition met. Adjusting PC.\n");
         NEXT_STATE.PC += offset;
         printf("Pre-b_cond Current PC: %08lx\n", CURRENT_STATE.PC);
