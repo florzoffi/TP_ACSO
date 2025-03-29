@@ -191,42 +191,86 @@ void print_flags() {
            CURRENT_STATE.FLAG_N);
 }
 
+//void b_cond(partition_t *split_data) {
+//    uint32_t raw_value = split_data->cond_br;
+//    int64_t offset = adjust_sign(raw_value << 2, 21);
+//    printf("Raw offset value: %u\n", raw_value);
+//    printf("Offset to apply: %" PRId64 "\n", offset);
+//    printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
+//    printf("New PC after branch: %08" PRIx64 "\n", NEXT_STATE.PC);
+//    switch (split_data->rt) {  
+//        case 0:  // BEQ
+//            printf("Extracted opcode_cb: %d\n", split_data->opcode );
+//            printf("Pre-b_cond\n");
+//            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+//            print_flags();
+//            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
+//            offset_global = offset;
+//            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+//            printf("Post-b_cond\n");
+//            print_flags();
+//            break;
+//        case 1:  // BNE
+//            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 0);
+//            break;
+//        case 11: // BLT
+//            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1);
+//            break;
+//        case 12: // BGT
+//            BRANCH_OCCURRED = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
+//            break;
+//        case 10: // BGE
+//            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0);
+//            break;
+//        case 13: // BLE
+//            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
+//            break;
+//        default:
+//            break;
+//    }
+//}
+
 void b_cond(partition_t *split_data) {
-    uint32_t raw_value = split_data->cond_br;
-    int64_t offset = adjust_sign(raw_value << 2, 21);
-    printf("Raw offset value: %u\n", raw_value);
-    printf("Offset to apply: %" PRId64 "\n", offset);
-    printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
-    printf("New PC after branch: %08" PRIx64 "\n", NEXT_STATE.PC);
-    switch (split_data->rt) {  
-        case 0:  // BEQ
-            printf("Extracted opcode_cb: %d\n", split_data->opcode );
-            printf("Pre-b_cond\n");
-            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
-            print_flags();
+    // Extraer offset con signo: 19 bits
+    int32_t signed_offset = adjust_sign(split_data->cond_br, 19);
+    int64_t offset = signed_offset << 2;
+
+    // Inicialmente, no hay salto
+    BRANCH_OCCURRED = FALSE;
+
+    switch (split_data->rt) {
+        case 0:  // BEQ (Z == 1)
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
-            offset_global = offset;
-            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
-            printf("Post-b_cond\n");
-            print_flags();
             break;
-        case 1:  // BNE
+
+        case 1:  // BNE (Z == 0)
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 0);
             break;
-        case 11: // BLT
+
+        case 11: // BLT (N == 1)
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1);
             break;
-        case 12: // BGT
-            BRANCH_OCCURRED = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
+
+        case 12: // BGT (N == 0 && Z == 0)
+            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0 && CURRENT_STATE.FLAG_Z == 0);
             break;
-        case 10: // BGE
+
+        case 10: // BGE (N == 0)
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0);
             break;
-        case 13: // BLE
+
+        case 13: // BLE (N == 1 || Z == 1)
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
             break;
+
         default:
+            // No salta para condiciones no implementadas
+            BRANCH_OCCURRED = FALSE;
             break;
+    }
+
+    if (BRANCH_OCCURRED) {
+        NEXT_STATE.PC = CURRENT_STATE.PC + offset;
     }
 }
 
@@ -398,12 +442,6 @@ void process_instruction() {
     if ( !err && info ) goto dispatch;
     printf( "opcode 4 done" );
 
-    // Handle que no reconoció la instrucción 
-    //printf("Instrucción no reconocida: 0x%08x", instruction);
-    //        SIM_RUNNING = false; // no se que sería eso, yo creería que aca llamo a halt (hlt)
-    //        return;
-
-    // Ejecutar con la estructura decodificada
     dispatch:
     if (!info || !info->decode || !info->execute) {
         printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
