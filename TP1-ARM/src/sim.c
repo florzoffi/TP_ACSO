@@ -169,6 +169,7 @@ void b(partition_t *split_data) {
 
 void br_register(partition_t *split_data) {
     CURRENT_STATE.PC = CURRENT_STATE.REGS[split_data->rn];
+    BRANCH_OCCURRED = TRUE;
 }
 
 void print_flags() {
@@ -176,7 +177,6 @@ void print_flags() {
            CURRENT_STATE.FLAG_Z,
            CURRENT_STATE.FLAG_N);
 }
-
 
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
@@ -393,7 +393,7 @@ void process_instruction() {
     // Ejecutar con la estructura decodificada
     dispatch:
     if (!info || !info->decode || !info->execute) {
-        printf("ERROR: info o sus punteros están en NULL\n");
+        printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         if (!BRANCH_OCCURRED) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + 4;
             } else {
@@ -409,6 +409,5 @@ void process_instruction() {
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
-    BRANCH_OCCURRED = false;    
-    return;
+    BRANCH_OCCURRED = FALSE;    
 }
