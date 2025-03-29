@@ -464,10 +464,6 @@ void process_instruction() {
 
     if ( !BRANCH_OCCURRED ) {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-    } else {
-        NEXT_STATE.PC = CURRENT_STATE.PC + offset_global;
-        offset_global = 0;
-    }
     BRANCH_OCCURRED = FALSE;   
     return;
 }
