@@ -181,9 +181,9 @@ void print_flags() {
 
 void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
-    printf("Extracted opcode_cb: %d\n", split_data->opcode);
-    printf("Offset to apply: %lld\n", offset);
-    printf("Pre-b_cond Current PC: %08x\n", CURRENT_STATE.PC);
+    printf("Offset to apply: %" PRId64 "\n", offset);
+    printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
+    printf("New PC after branch: %08" PRIx64 "\n", NEXT_STATE.PC);
     switch (split_data->rt) {  
         case 0:  // BEQ
             printf("Extracted opcode_cb: %d\n", split_data->opcode );
