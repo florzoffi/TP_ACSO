@@ -116,7 +116,10 @@ void adds_immediate(partition_t *split_data) {
     printf("Post-adds X2: %" PRId64 "\n", CURRENT_STATE.REGS[2]);
 
     if (split_data->rd != 31) {
+        printf("Before CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
         NEXT_STATE.REGS[split_data->rd] = operation;
+        printf("After CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+
     }
 
 }
@@ -127,7 +130,10 @@ void subs_extended_register(partition_t *split_data) {
     NEXT_STATE.FLAG_Z = (operation == 0);
     //CMP
     if (split_data->rd != 31) {
+        printf("Before CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
         NEXT_STATE.REGS[split_data->rd] = operation;
+        printf("After CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
+
     }
 }
 
@@ -194,8 +200,10 @@ void b_cond(partition_t *split_data) {
         case 0:  // BEQ
             printf("Extracted opcode_cb: %d\n", split_data->opcode );
             printf("Pre-b_cond\n");
+            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             print_flags();
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
+            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             printf("Post-b_cond\n");
             print_flags();
             break;
@@ -219,15 +227,15 @@ void b_cond(partition_t *split_data) {
     }
 
     if (BRANCH_OCCURRED) {
-    uint64_t oldPC = CURRENT_STATE.PC;
-    CURRENT_STATE.PC += offset;  // Intenta actualizar el PC con el offset
-    if (CURRENT_STATE.PC == oldPC) {
-        CURRENT_STATE.PC += 4;  // Fuerza el PC a avanzar si el offset no cambia el PC
+        printf("Offset to apply: %ld\n", offset);
+        printf("Current PC: %08lx\n", CURRENT_STATE.PC);
+        printf("Branch condition met. Adjusting PC.\n");
+        NEXT_STATE.PC += offset;
+        printf("Pre-b_cond Current PC: %08lx\n", CURRENT_STATE.PC);
+        printf("New PC after branch: %08lx\n", NEXT_STATE.PC);
+    } else {
+        printf("Branch condition not met.\n");
     }
-} else {
-    CURRENT_STATE.PC += 4;  // Avanza PC si no hay condición de rama cumplida
-}
-
 }
 
 void lsl_lsr_immediate(partition_t *split_data) {
