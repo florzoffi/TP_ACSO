@@ -54,12 +54,12 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0xB1, split_i, adds_immediate, "Adds Immediate" );
     ADD_INSTRUCTION( 0x758, split_r, subs_extended_register, "Subs Extended Register" );
     ADD_INSTRUCTION( 0xF1, split_i, subs_immediate, "Subs Immediate" );
-    ADD_INSTRUCTION( 0x6a2, split_iw, hlt, "HLT" ); // NO SE SI LA CORRI O NO
+    ADD_INSTRUCTION( 0x6A2, split_iw, hlt, "HLT" ); // NO SE SI LA CORRI O NO
     ADD_INSTRUCTION( 0x750, split_r, ands_shifted_register, "Ands Shifted Register" );
     ADD_INSTRUCTION( 0xCA, split_r, eor_shifted_register, "Eor Shifted Register" );
     ADD_INSTRUCTION( 0xAA, split_r, orr_shifted_register, "Orr Shifted Register" ); // No la testee todavía
     ADD_INSTRUCTION( 0x5, split_b, b, "B Target" );
-    ADD_INSTRUCTION( 0x6b0, split_r, br_register, "Br Register" );
+    ADD_INSTRUCTION( 0x6B0, split_r, br_register, "Br Register" );
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); // No la testee todavia
     ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" ); // No la testee todavia
 
@@ -403,7 +403,7 @@ void process_instruction() {
             BRANCH_OCCURRED = FALSE;
             printf( "Entro a BRANCH" );
         }
-        exit(EXIT_FAILURE);
+        return;
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
