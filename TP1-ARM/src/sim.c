@@ -399,8 +399,7 @@ void process_instruction() {
             } else {
                 BRANCH_OCCURRED = FALSE;
             }
-
-            return;
+        exit(EXIT_FAILURE);
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
