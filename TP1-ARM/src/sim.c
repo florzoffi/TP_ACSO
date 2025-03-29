@@ -439,9 +439,11 @@ void process_instruction() {
     printf( "empueza el execute" ); 
     info->execute( &splitted );              
 
-    if ( !BRANCH_OCCURRED ) {
+    if (BRANCH_OCCURRED) {
+        // PC ya fue actualizado por b_cond
+        BRANCH_OCCURRED = false;
+    } else {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-    BRANCH_OCCURRED = FALSE;   
+    }    
     return;
-}
 }
