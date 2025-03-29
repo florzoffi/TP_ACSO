@@ -231,31 +231,19 @@ void print_flags() {
 //}
 
 void b_cond(partition_t *split_data) {
-    int32_t offset = adjust_sign(split_data->cond_br, 19) << 2;
+    // Sign-extend imm19 and apply <<2
+    int32_t offset = ((int32_t)(split_data->cond_br << 13)) >> 11;
 
     bool condition_met = false;
 
-    switch (split_data->rt) {  
-        case 0:  // BEQ
-            condition_met = (CURRENT_STATE.FLAG_Z == 1);
-            break;
-        case 1:  // BNE
-            condition_met = (CURRENT_STATE.FLAG_Z == 0);
-            break;
-        case 11: // BLT
-            condition_met = (CURRENT_STATE.FLAG_N == 1);
-            break;
-        case 12: // BGT
-            condition_met = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0);
-            break;
-        case 10: // BGE
-            condition_met = (CURRENT_STATE.FLAG_N == 0);
-            break;
-        case 13: // BLE
-            condition_met = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
-            break;
-        default:
-            break;
+    switch (split_data->rt) {
+        case 0:  condition_met = (CURRENT_STATE.FLAG_Z == 1); break; // BEQ
+        case 1:  condition_met = (CURRENT_STATE.FLAG_Z == 0); break; // BNE
+        case 11: condition_met = (CURRENT_STATE.FLAG_N == 1); break; // BLT
+        case 12: condition_met = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0); break; // BGT
+        case 10: condition_met = (CURRENT_STATE.FLAG_N == 0); break; // BGE
+        case 13: condition_met = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1); break; // BLE
+        default: break;
     }
 
     if (condition_met) {
@@ -452,11 +440,7 @@ void process_instruction() {
     printf( "empueza el execute" ); 
     info->execute( &splitted );              
 
-    if (BRANCH_OCCURRED) {
-        // PC ya fue actualizado por b_cond
-        BRANCH_OCCURRED = false;
-    } else {
-        NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-    }    
-    return;
+    if (!BRANCH_OCCURRED){ 
+        NEXT_STATE.PC = CURRENT_STATE.PC + 4;}
+    BRANCH_OCCURRED = false;
 }
