@@ -81,8 +81,11 @@ void init_instruction_table() {
 
 
 int64_t adjust_sign(uint32_t value, int bits) {
-    int64_t offset = (int64_t)(value << (64 - bits)) >> (64 - bits); // Sign-extend the value
-    return offset;
+    // Calcular la máscara de signo basada en el número de bits significativos
+    int64_t mask = 1LL << (bits - 1);
+    value = value << (32 - bits);  // Alinea el bit de signo con el bit más significativo de un entero de 32 bits
+    value = value >> (32 - bits);  // Realiza la extensión de signo
+    return (int64_t)(value) - (value & mask ? mask << 1 : 0);
 }
 /*
 int32_t adjust_sign(uint32_t value, int bits) {
