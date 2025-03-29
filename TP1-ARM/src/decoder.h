@@ -46,7 +46,11 @@ void ldurb(partition_t* p);
 void ldurh(partition_t* p);
 void movz(partition_t* p);
 
-
+void add_immediate(partition_t* p);
+void add_extended_register(partition_t* p);
+void mul_register(partition_t* p);
+void cbz(partition_t* p);
+void cbnz(partition_t* p);
 
 void init_instruction_table();
 char* uint32_to_string( uint32_t number );

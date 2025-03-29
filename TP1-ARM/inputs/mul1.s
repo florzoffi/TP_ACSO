@@ -1,0 +1,9 @@
+.text
+MOVZ X1, 0
+MOVZ X2, 42
+MUL X3, X1, X2 
+
+MOVZ X4, 9
+MUL X5, X2, X1  
+
+HLT 0

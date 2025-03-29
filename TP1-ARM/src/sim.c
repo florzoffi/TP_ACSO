@@ -73,7 +73,11 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0x1C2, split_d, ldurb, "LDURB" ); // No la testee todavia
     ADD_INSTRUCTION( 0x694, split_iw, movz, "MOVZ" ); // No la testee todavia
 
-
+    ADD_INSTRUCTION( 0x458, split_r, add_extended_register, "Add Extended Register" );
+    ADD_INSTRUCTION( 0x91,  split_i, add_immediate, "Add Immediate" );
+    ADD_INSTRUCTION(0x4D8, split_r, mul_register, "MUL");
+    ADD_INSTRUCTION(0xB4, split_cb, cbz, "CBZ");
+    ADD_INSTRUCTION(0xB5, split_cb, cbnz, "CBNZ");
 }
 
 int32_t adjust_sign(uint32_t value, int bits) {
@@ -266,6 +270,50 @@ void movz(partition_t *split_data) {
     }
 }
 
+void add_immediate(partition_t *split_data) {
+    uint64_t imm = split_data->alu;
+    if (split_data->shamt == 0x1) {
+        imm <<= 12;
+    }
+
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + imm;
+
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
+}
+
+void add_extended_register(partition_t *split_data) {
+    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
+
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = operation;
+    }
+}
+
+void mul_register(partition_t *split_data) {
+    uint64_t result = CURRENT_STATE.REGS[split_data->rn] * CURRENT_STATE.REGS[split_data->rm];
+
+    if (split_data->rd != 31) {
+        NEXT_STATE.REGS[split_data->rd] = result;
+    }
+}
+
+void cbz(partition_t *split_data) {
+    if (CURRENT_STATE.REGS[split_data->rt] == 0) {
+        int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+        NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+        BRANCH_OCCURRED = TRUE;
+    }
+}
+
+void cbnz(partition_t *split_data) {
+    if (CURRENT_STATE.REGS[split_data->rt] != 0) {
+        int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
+        NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+        BRANCH_OCCURRED = TRUE;
+    }
+}
 
 // --------------------------------------------------------------------------------------------
 

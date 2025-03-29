@@ -1,0 +1,11 @@
+.text
+MOVZ X4, 0
+MOVZ X5, 3
+CBNZ X4, skip1
+MOVZ X6, 111
+skip1:
+CBNZ X5, skip2
+MOVZ X7, 222
+skip2:
+MOVZ X8, 888
+HLT 0
