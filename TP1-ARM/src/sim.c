@@ -396,14 +396,14 @@ void process_instruction() {
         printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         if (!BRANCH_OCCURRED) {
             printf( "Entro a !BRANCH" );
-            NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+            NEXT_STATE.PC = NEXT_STATE.PC + 4;
             printf( "Ejecuto a !BRANCH" );
         } else {
             printf( "Entro a BRANCH" );
             BRANCH_OCCURRED = FALSE;
             printf( "Entro a BRANCH" );
         }
-        return;
+        exit(EXIT_FAILURE);
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
