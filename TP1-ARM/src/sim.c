@@ -203,7 +203,7 @@ void b_cond(partition_t *split_data) {
             printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             print_flags();
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
-            offset_global = offset;
+            offset_global += offset;
             printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
             printf("Post-b_cond\n");
             print_flags();
