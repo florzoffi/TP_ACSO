@@ -141,6 +141,8 @@ void subs_immediate(partition_t *split_data) {
 
 void hlt(partition_t *split_data) {
     RUN_BIT = 0;
+    printf("Simulator halted\n\n");
+
 }
 
 void ands_shifted_register(partition_t *split_data) {
