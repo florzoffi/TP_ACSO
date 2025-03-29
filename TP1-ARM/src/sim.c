@@ -396,7 +396,7 @@ void process_instruction() {
         printf("ERROR: info o sus punteros están en NULL\n"); // Segmentation fault
         if (!BRANCH_OCCURRED) {
             printf( "Entro a !BRANCH" );
-            NEXT_STATE.PC = NEXT_STATE.PC + 4;
+            NEXT_STATE.PC = CURRENT_STATE.PC + 4;
             printf( "Ejecuto a !BRANCH" );
         } else {
             printf( "Entro a BRANCH" );
@@ -411,7 +411,7 @@ void process_instruction() {
     info->execute( &splitted );              
 
     if ( !BRANCH_OCCURRED ) {
-        NEXT_STATE.PC = NEXT_STATE.PC + 4;
+        NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
     BRANCH_OCCURRED = FALSE;    
     return;
