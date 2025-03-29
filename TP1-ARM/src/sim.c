@@ -215,7 +215,8 @@ void b_cond(partition_t *split_data) {
     if (BRANCH_OCCURRED) {
         printf("Branch condition met. Adjusting PC.\n");
         NEXT_STATE.PC += offset;
-        printf("New PC after branch: %08x\n", NEXT_STATE.PC);
+        printf("Pre-b_cond Current PC: %08lx\n", CURRENT_STATE.PC);
+        printf("New PC after branch: %08lx\n", NEXT_STATE.PC);
     } else {
         printf("Branch condition not met.\n");
     }
