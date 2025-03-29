@@ -183,6 +183,7 @@ void b_cond(partition_t *split_data) {
     int64_t offset = adjust_sign(split_data->cond_br << 2, 21);
     switch (split_data->rt) {  
         case 0:  // BEQ
+            printf("Extracted opcode_cb: %d\n", split_data->opcode );
             printf("Pre-b_cond\n");
             print_flags();
             BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
