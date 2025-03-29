@@ -219,14 +219,12 @@ void b_cond(partition_t *split_data) {
     }
 
     if (BRANCH_OCCURRED) {
-        printf("Offset to apply: %ld\n", offset);
-        printf("Current PC: %08lx\n", CURRENT_STATE.PC);
-        printf("Branch condition met. Adjusting PC.\n");
-        NEXT_STATE.PC += offset;
-        printf("Pre-b_cond Current PC: %08lx\n", CURRENT_STATE.PC);
-        printf("New PC after branch: %08lx\n", NEXT_STATE.PC);
-    } else {
-        printf("Branch condition not met.\n");
+        uint64_t oldPC = CURRENT_STATE.PC;
+        CURRENT_STATE.PC += offset;
+        if (CURRENT_STATE.PC == oldPC) {
+            // Si PC no ha cambiado, avanza forzadamente para evitar bucles infinitos.
+            CURRENT_STATE.PC += 4;
+        }
     }
 }
 
