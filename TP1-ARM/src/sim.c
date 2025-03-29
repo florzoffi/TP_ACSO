@@ -399,6 +399,7 @@ void process_instruction() {
             NEXT_STATE.PC = CURRENT_STATE.PC + 4;
         } else {
             BRANCH_OCCURRED = FALSE;
+        }
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
