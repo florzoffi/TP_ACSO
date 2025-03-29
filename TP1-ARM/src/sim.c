@@ -411,7 +411,7 @@ void process_instruction() {
     info->execute( &splitted );              
 
     if ( !BRANCH_OCCURRED ) {
-        NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+        NEXT_STATE.PC = NEXT_STATE.PC + 4;
     }
     BRANCH_OCCURRED = FALSE;    
     return;
