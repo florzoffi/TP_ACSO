@@ -119,7 +119,6 @@ void adds_immediate(partition_t *split_data) {
         printf("Before CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
         NEXT_STATE.REGS[split_data->rd] = operation;
         printf("After CMP: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
-
     }
 
 }
@@ -224,17 +223,6 @@ void b_cond(partition_t *split_data) {
             break;
         default:
             break;
-    }
-
-    if (BRANCH_OCCURRED) {
-        printf("Offset to apply: %ld\n", offset);
-        printf("Current PC: %08lx\n", CURRENT_STATE.PC);
-        printf("Branch condition met. Adjusting PC.\n");
-        CURRENT_STATE.PC = CURRENT_STATE.PC + offset;
-        printf("Pre-b_cond Current PC: %08lx\n", CURRENT_STATE.PC);
-        printf("New PC after branch: %08lx\n", NEXT_STATE.PC);
-    } else {
-        printf("Branch condition not met.\n");
     }
 }
 
