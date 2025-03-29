@@ -248,7 +248,7 @@ void b_cond(partition_t *split_data) {
 
     if (condition_met) {
         NEXT_STATE.PC = CURRENT_STATE.PC + offset;
-        BRANCH_OCCURRED = true;
+        BRANCH_OCCURRED = TRUE;
     }
 }
 
@@ -436,5 +436,5 @@ void process_instruction() {
 
     if (!BRANCH_OCCURRED){ 
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;}
-    BRANCH_OCCURRED = false;
+    BRANCH_OCCURRED = FALSE;
 }
