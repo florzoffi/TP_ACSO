@@ -424,6 +424,6 @@ void process_instruction() {
         NEXT_STATE.PC = CURRENT_STATE.PC + 4;
     }
     BRANCH_OCCURRED = FALSE;   
-    NEXT_STATE.PC = CURRENT_STATE.PC + 4; 
+    NEXT_STATE.PC = CURRENT_STATE.PC; 
     return;
 }
