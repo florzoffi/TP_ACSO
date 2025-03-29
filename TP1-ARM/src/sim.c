@@ -231,46 +231,23 @@ void print_flags() {
 //}
 
 void b_cond(partition_t *split_data) {
-    // Extraer offset con signo: 19 bits
-    int32_t signed_offset = adjust_sign(split_data->cond_br, 19);
-    int64_t offset = signed_offset << 2;
+    int32_t offset = adjust_sign(split_data->cond_br, 19) << 2;
 
-    // Inicialmente, no hay salto
-    BRANCH_OCCURRED = FALSE;
+    bool condition_met = false;
 
     switch (split_data->rt) {
-        case 0:  // BEQ (Z == 1)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 1);
-            break;
-
-        case 1:  // BNE (Z == 0)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_Z == 0);
-            break;
-
-        case 11: // BLT (N == 1)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1);
-            break;
-
-        case 12: // BGT (N == 0 && Z == 0)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0 && CURRENT_STATE.FLAG_Z == 0);
-            break;
-
-        case 10: // BGE (N == 0)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 0);
-            break;
-
-        case 13: // BLE (N == 1 || Z == 1)
-            BRANCH_OCCURRED = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1);
-            break;
-
-        default:
-            // No salta para condiciones no implementadas
-            BRANCH_OCCURRED = FALSE;
-            break;
+        case 0:  condition_met = (CURRENT_STATE.FLAG_Z == 1); break; // BEQ
+        case 1:  condition_met = (CURRENT_STATE.FLAG_Z == 0); break; // BNE
+        case 11: condition_met = (CURRENT_STATE.FLAG_N == 1); break; // BLT
+        case 12: condition_met = (!CURRENT_STATE.FLAG_N && CURRENT_STATE.FLAG_Z == 0); break; // BGT
+        case 10: condition_met = (CURRENT_STATE.FLAG_N == 0); break; // BGE
+        case 13: condition_met = (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1); break; // BLE
+        default: break;
     }
 
-    if (BRANCH_OCCURRED) {
+    if (condition_met) {
         NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+        BRANCH_OCCURRED = true;
     }
 }
 
