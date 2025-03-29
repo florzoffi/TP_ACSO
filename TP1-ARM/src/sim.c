@@ -219,13 +219,15 @@ void b_cond(partition_t *split_data) {
     }
 
     if (BRANCH_OCCURRED) {
-        uint64_t oldPC = CURRENT_STATE.PC;
-        CURRENT_STATE.PC += offset;
-        if (CURRENT_STATE.PC == oldPC) {
-            // Si PC no ha cambiado, avanza forzadamente para evitar bucles infinitos.
-            CURRENT_STATE.PC += 4;
-        }
+    uint64_t oldPC = CURRENT_STATE.PC;
+    CURRENT_STATE.PC += offset;  // Intenta actualizar el PC con el offset
+    if (CURRENT_STATE.PC == oldPC) {
+        CURRENT_STATE.PC += 4;  // Fuerza el PC a avanzar si el offset no cambia el PC
     }
+} else {
+    CURRENT_STATE.PC += 4;  // Avanza PC si no hay condición de rama cumplida
+}
+
 }
 
 void lsl_lsr_immediate(partition_t *split_data) {
