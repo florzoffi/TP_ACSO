@@ -112,7 +112,6 @@ void subs_extended_register(partition_t *split_data) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] - CURRENT_STATE.REGS[split_data->rm];
     NEXT_STATE.FLAG_N = (operation >> 63) & 1;
     NEXT_STATE.FLAG_Z = (operation == 0);
-    //NEXT_STATE.REGS[split_data->rd] = operation;
     //CMP
     if (split_data->rd != 31) {
         NEXT_STATE.REGS[split_data->rd] = operation;
@@ -127,7 +126,6 @@ void subs_immediate(partition_t *split_data) {
     uint64_t operation = CURRENT_STATE.REGS[split_data->rn] - imm;
     NEXT_STATE.FLAG_N = (operation >> 63) & 1;
     NEXT_STATE.FLAG_Z = (operation == 0);
-    //NEXT_STATE.REGS[split_data->rd] = operation;
     //CMP
     if (split_data->rd != 31) {
         NEXT_STATE.REGS[split_data->rd] = operation;
