@@ -394,13 +394,7 @@ void process_instruction() {
     dispatch:
     if (!info || !info->decode || !info->execute) {
         printf("ERROR: info o sus punteros están en NULL\n");
-        if (!BRANCH_OCCURRED) {
-                NEXT_STATE.PC = CURRENT_STATE.PC + 4;
-            } else {
-                BRANCH_OCCURRED = FALSE;
-            }
-
-            return;
+        exit(1);
     }
     printf( "empieza el split" );
     info->decode( &splitted, instruction );  
