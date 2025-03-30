@@ -105,7 +105,6 @@ void adds_extended_register( partition_t *split_data ) {
    NEXT_STATE.FLAG_Z = operation == 0;
    NEXT_STATE.REGS[split_data->rd] = operation;
 
-
    if (split_data->rd != 31) {
        NEXT_STATE.REGS[split_data->rd] = operation;
    }
@@ -209,7 +208,7 @@ void print_flags() {
 
 void b_cond(partition_t *split_data) {
    uint32_t raw_value = split_data->cond_br;
-   int64_t offset = adjust_sign(raw_value << 2, 21);
+   uint64_t offset = adjust_sign(raw_value << 2, 21);
    printf("Raw offset value: %u\n", raw_value);
    printf("Offset to apply: %" PRId64 "\n", offset);
    printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
