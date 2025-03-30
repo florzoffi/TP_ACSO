@@ -62,6 +62,6 @@ void split_d( partition_t* parts, uint32_t instruction );
 void split_b( partition_t* parts, uint32_t instruction );
 void split_cb( partition_t* parts, uint32_t instruction );
 void split_iw( partition_t* parts, uint32_t instruction );
-uint16_t show(uint32_t instruction, int shift, uint32_t mask);
+uint32_t show(uint32_t instruction, int shift, uint32_t mask);
 
 #endif
