@@ -87,6 +87,7 @@ void init_instruction_table() {
 
 uint64_t adjust_sign(uint64_t n, size_t bits) {
     uint64_t m = 1U << (bits - 1);
+    printf("Se entro a la fucnion adjust sign");
     return (n ^ m) - m;
 }
 /*
@@ -208,7 +209,7 @@ void print_flags() {
 
 void b_cond(partition_t *split_data) {
     uint32_t raw_value = split_data->cond_br;
-    int64_t offset = adjust_sign(raw_value << 2, 19);
+    int64_t offset = adjust_sign(raw_value << 2, 21);
     printf("Raw offset value: %u\n", raw_value);
     printf("Offset to apply: %" PRId64 "\n", offset);
     printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
