@@ -209,6 +209,8 @@ void print_flags() {
 }
 
 void b_cond(partition_t *split_data) {
+    printf("split_data->cond_br: 0x%x\n", split_data->cond_br);
+    printf("split_data->rt (cond): %d\n", split_data->rt);
     uint32_t raw_value = split_data->cond_br;
     int64_t offset = adjust_sign(raw_value << 2, 21);
     printf("Raw offset value: %u\n", raw_value);
@@ -226,7 +228,6 @@ void b_cond(partition_t *split_data) {
                 NEXT_STATE.PC = CURRENT_STATE.PC + offset;
                 BRANCH_OCCURRED = TRUE;
             }
-            break;
            printf("After BEQ to foo: PC = %08lx, Z-Flag = %d\n", CURRENT_STATE.PC, CURRENT_STATE.FLAG_Z);
            printf("Post-b_cond\n");
            print_flags();
