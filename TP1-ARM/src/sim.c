@@ -207,8 +207,6 @@ void print_flags() {
 }
 
 void b_cond(partition_t *split_data) {
-    uint32_t raw_value = 0;
-    int64_t offset = 0;
     uint32_t raw_value = split_data->cond_br;
     int64_t offset = adjust_sign(raw_value << 2, 21);
     printf("Raw offset value: %u\n", raw_value);
@@ -390,6 +388,8 @@ void lazy_innit_hash() {
    }
 }
 void process_instruction() {
+    uint32_t raw_value = 0;
+    int64_t offset = 0;
    lazy_innit_hash();
   
    uint32_t instruction = mem_read_32( CURRENT_STATE.PC );
