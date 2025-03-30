@@ -60,8 +60,6 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0x6B0, split_r, br_register, "Br Register" );
     ADD_INSTRUCTION( 0x54, split_cb, b_cond, "Branch Conditional Types" ); 
     ADD_INSTRUCTION( 0x34D, split_i, lsl_lsr_immediate, "LSL and LSR Immediate" );
- 
- 
     ADD_INSTRUCTION( 0x7C0, split_d, stur, "STUR" );
     ADD_INSTRUCTION( 0x1C0, split_d, sturb, "STURB" );
     ADD_INSTRUCTION( 0x3C0, split_d, sturh, "STURH" );
@@ -69,8 +67,6 @@ void init_instruction_table() {
     ADD_INSTRUCTION( 0x3C2, split_d, ldurh, "LDURH" ); 
     ADD_INSTRUCTION( 0x1C2, split_d, ldurb, "LDURB" ); 
     ADD_INSTRUCTION( 0x694, split_iw, movz, "MOVZ" ); 
- 
- 
     ADD_INSTRUCTION( 0x458, split_r, add_extended_register, "Add Extended Register" );
     ADD_INSTRUCTION( 0x91,  split_i, add_immediate, "Add Immediate" );
     ADD_INSTRUCTION( 0x4D8, split_r, mul_register, "MUL" );
@@ -93,20 +89,17 @@ void process_instruction() {
     partition_t splitted;
     bool err = false;
 
-
     uint32_t opcode_b = ( instruction >> 26 ) & 0x3F;
     char* key_b = uint32_to_string( opcode_b );
     info = dictionary_get( instruction_table, key_b, &err );
     free( key_b );
     if ( !err && info ) goto dispatch;
 
- 
     uint32_t opcode_cb = ( instruction >> 24 ) & 0xFF;
     char* key_cb = uint32_to_string( opcode_cb );
     info = dictionary_get( instruction_table, key_cb, &err );
     free( key_cb );
     if ( !err && info ) goto dispatch;
-
 
     uint32_t opcode_i = ( instruction >> 22 ) & 0x3FF;
     char* key_i = uint32_to_string( opcode_i );
@@ -114,13 +107,11 @@ void process_instruction() {
     free( key_i );
     if ( !err && info ) goto dispatch;
 
-
     uint32_t opcode_r_d_iw = ( instruction >> 21 ) & 0x7FF;
     char* key_r_d_iw = uint32_to_string( opcode_r_d_iw );
     info = dictionary_get( instruction_table, key_r_d_iw, &err );
     free( key_r_d_iw );
     if ( !err && info ) goto dispatch;
-
  
     dispatch:
     if ( !info || !info->decode || !info->execute ) {
