@@ -9,8 +9,8 @@
 #include "shell.h"
 #include "hopscotch.h"
 #include "decoder.h"
-#include "sim.c"
 #include "functions.h"
+extern int BRANCH_OCCURRED;
 
 void adds_extended_register( partition_t *split_data ) {
    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
