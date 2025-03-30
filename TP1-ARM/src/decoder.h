@@ -26,6 +26,9 @@ typedef struct {
 
 void init_instruction_table();
 char* uint32_to_string( uint32_t number );
+void ADD_INSTRUCTION ( uint32_t opcode, void  (*decode_fn )( partition_t*, uint32_t ), void ( *execute_fn )( partition_t* ), const char* name_str );
+uint64_t adjust_sign( uint64_t n, size_t bits );
+void process_instruction();
 
 void decode(void);
 void split_r( partition_t* parts, uint32_t instruction );
