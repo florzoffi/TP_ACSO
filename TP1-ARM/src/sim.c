@@ -215,7 +215,7 @@ void b_cond(partition_t *split_data) {
    uint32_t raw_value = split_data->cond_br;
    uint32_t offset = sign_extend(raw_value << 2, 21);
    printf("Raw offset value: %u\n", raw_value);
-   printf("Offset to apply: %" PRId64 "\n", offset);
+   printf("Offset to apply: %u\n", offset);
    printf("Pre-b_cond Current PC: %08" PRIx64 "\n", CURRENT_STATE.PC);
    printf("New PC after branch: %08" PRIx64 "\n", NEXT_STATE.PC);
 
