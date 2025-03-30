@@ -84,17 +84,11 @@ void init_instruction_table() {
    ADD_INSTRUCTION(0xB5, split_cb, cbnz, "CBNZ");
 }
 
-int64_t adjust_sign(int32_t val, int bits) {
-    int32_t mask = 1 << (bits - 1);
-    return (int64_t)((val ^ mask) - mask);
+uint64_t adjust_sign(uint64_t n, size_t bits) {
+    uint64_t m = 1U << (bits - 1);
+    printf("Se entro a la fucnion adjust sign");
+    return (n ^ m) - m;
 }
-
-
-// uint64_t adjust_sign(uint64_t n, size_t bits) {
-//     uint64_t m = 1U << (bits - 1);
-//     printf("Se entro a la fucnion adjust sign");
-//     return (n ^ m) - m;
-// }
 
 /*
 int32_t adjust_sign(uint32_t value, int bits) {
@@ -349,7 +343,6 @@ void add_immediate(partition_t *split_data) {
 void add_extended_register(partition_t *split_data) {
    uint64_t operation = CURRENT_STATE.REGS[split_data->rn] + CURRENT_STATE.REGS[split_data->rm];
 
-
    if (split_data->rd != 31) {
        NEXT_STATE.REGS[split_data->rd] = operation;
    }
@@ -358,7 +351,6 @@ void add_extended_register(partition_t *split_data) {
 
 void mul_register(partition_t *split_data) {
    uint64_t result = CURRENT_STATE.REGS[split_data->rn] * CURRENT_STATE.REGS[split_data->rm];
-
 
    if (split_data->rd != 31) {
        NEXT_STATE.REGS[split_data->rd] = result;

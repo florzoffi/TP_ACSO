@@ -4,7 +4,7 @@
 #include "shell.h"
 #include "decoder.h"
 
-uint16_t show( uint32_t instruction, int shift, uint32_t mask ){
+uint32_t show( uint32_t instruction, int shift, uint32_t mask ){
     return ( instruction >> shift ) & mask;
 }
 
