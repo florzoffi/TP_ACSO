@@ -86,8 +86,9 @@ void init_instruction_table() {
 
 int64_t adjust_sign(int32_t val, int bits) {
     int32_t mask = 1 << (bits - 1);
-    return (val ^ mask) - mask;
+    return (int64_t)((val ^ mask) - mask);
 }
+
 
 // uint64_t adjust_sign(uint64_t n, size_t bits) {
 //     uint64_t m = 1U << (bits - 1);
