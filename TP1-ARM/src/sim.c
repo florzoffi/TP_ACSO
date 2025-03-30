@@ -85,10 +85,18 @@ void init_instruction_table() {
 }
 
 
-uint64_t adjust_sign(uint64_t n, size_t bits) {
+/*uint64_t adjust_sign(uint64_t n, size_t bits) {
     uint64_t m = 1U << (bits - 1);
     printf("Se entro a la fucnion adjust sign");
     return (n ^ m) - m;
+}*/
+
+int64_t adjust_sign(uint32_t value, int bits) {
+    // Asumiendo que 'value' es un valor extraído que necesita extensión de signo
+    // 'bits' es el número total de bits del campo extraído, incluido el bit de signo
+    int shift = 32 - bits;  // Ajuste para 32-bit integer, ajusta si usas un tipo diferente
+    int32_t signed_value = (int32_t)(value << shift) >> shift;  // Extiende el signo
+    return signed_value;
 }
 /*
 int32_t adjust_sign(uint32_t value, int bits) {
