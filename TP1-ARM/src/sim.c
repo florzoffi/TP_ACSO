@@ -85,11 +85,9 @@ void init_instruction_table() {
 }
 
 
-
-
-int64_t adjust_sign(uint32_t value, int bits) {
-   int64_t offset = (int64_t)(value << (64 - bits)) >> (64 - bits); // Sign-extend the value
-   return offset;
+uint64_t adjust_sign(uint64_t n, size_t bits) {
+    uint64_t m = 1U << (bits - 1);
+    return (n ^ m) - m;
 }
 /*
 int32_t adjust_sign(uint32_t value, int bits) {
@@ -163,7 +161,6 @@ void subs_immediate(partition_t *split_data) {
            NEXT_STATE.REGS[split_data->rd] = operation;
    }
 }
-
 
 void hlt(partition_t *split_data) {
    RUN_BIT = 0;
