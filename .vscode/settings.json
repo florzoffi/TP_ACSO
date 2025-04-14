@@ -4,6 +4,7 @@
         "stdint.h": "c",
         "__node_handle": "c",
         "assert.h": "c",
-        "shell.h": "c"
+        "shell.h": "c",
+        "hopscotch.h": "c"
     }
 }
