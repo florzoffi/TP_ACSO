@@ -1,38 +1,33 @@
 #include "ej1.h"
-#include <stdlib.h>
-#include <string.h>
 
 string_proc_list* string_proc_list_create(void){
-	string_proc_list* list = malloc(sizeof(*list));
-    if (!list) {
-        fprintf(stderr, "Error: malloc falló en string_proc_list_create\n");
-        exit(1);
-    }
+	string_proc_list* list = ( string_proc_list* )malloc( sizeof( string_proc_list ) );
+    if ( !list ) return NULL;
     list->first = NULL;
     list->last = NULL;
     return list;
 }
 
 string_proc_node* string_proc_node_create( uint8_t type, char* hash ){
-	string_proc_node* node = malloc(sizeof(*node));
-    if (!node) {
-        fprintf(stderr, "Error: malloc falló en string_proc_node_create\n");
-        exit(1);
-    }
+	string_proc_node* node = ( string_proc_node* )malloc( sizeof( string_proc_node ) );
+    if ( !node ) return NULL;
     node->type = type;
-    node->hash = hash;
+    node->hash = hash;        
     node->next = NULL;
     node->previous = NULL;
     return node;
 }
 
 void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash ){
+    if ( !list ) return;
     string_proc_node* node = string_proc_node_create(type, hash);
 
     if (list->first == NULL) {
+        // Lista vacía
         list->first = node;
         list->last = node;
     } else {
+        // Hay al menos un nodo
         node->previous = list->last;
         list->last->next = node;
         list->last = node;
@@ -40,20 +35,19 @@ void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash
 }
 
 char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash){
+    if ( !list || !hash ) return NULL;
     string_proc_list_add_node(list, type, hash);
 
-    char* result = strdup(hash);
-    if (!result) {
-        fprintf(stderr, "Error: malloc falló en string_proc_list_concat (strdup)\n");
-        exit(1);
-    }
+    char* result = NULL;
 
     string_proc_node* current = list->first;
     while (current != NULL) {
         if (current->type == type) {
-            char* new_result = str_concat(result, current->hash);
-            free(result);
-            result = new_result;
+            if (result == NULL) {
+                result = current->hash;
+            } else {
+                result = str_concat(result, current->hash);
+            }
         }
         current = current->next;
     }
