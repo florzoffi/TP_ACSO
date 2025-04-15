@@ -38,16 +38,19 @@ char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash)
     if ( !list || !hash ) return NULL;
     string_proc_list_add_node(list, type, hash);
 
-    char* result = NULL;
+    char* result = malloc(strlen(hash) + 1);
+    if (!result) {
+        fprintf(stderr, "Error: malloc falló en concat\n");
+        exit(1);
+    }
+    strcpy(result, hash);
 
     string_proc_node* current = list->first;
     while (current != NULL) {
         if (current->type == type) {
-            if (result == NULL) {
-                result = current->hash;
-            } else {
-                result = str_concat(result, current->hash);
-            }
+            char* new_result = str_concat(result, current->hash);
+            free(result);  // ✅ liberamos la anterior
+            result = new_result;
         }
         current = current->next;
     }
