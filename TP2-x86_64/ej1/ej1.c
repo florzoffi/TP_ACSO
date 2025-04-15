@@ -1,4 +1,6 @@
 #include "ej1.h"
+#include <stdlib.h>
+#include <string.h>
 
 string_proc_list* string_proc_list_create(void){
 	string_proc_list* list = ( string_proc_list* )malloc( sizeof( string_proc_list ) );
