@@ -3,57 +3,31 @@
 #include <string.h>
 
 string_proc_list* string_proc_list_create(void){
-	//string_proc_list* list = ( string_proc_list* )malloc( sizeof( string_proc_list ) );
-    //if ( list == NULL ) return NULL;
-    //list->first = NULL;
-    //list->last = NULL;
-    //return list;
-    string_proc_list* list = (string_proc_list*)malloc(sizeof(string_proc_list));
-    if (list == NULL) return NULL;
-
+	string_proc_list* list = malloc(sizeof(*list));
+    if (!list) {
+        fprintf(stderr, "Error: malloc falló en string_proc_list_create\n");
+        exit(1);
+    }
     list->first = NULL;
     list->last = NULL;
-
     return list;
 }
 
 string_proc_node* string_proc_node_create( uint8_t type, char* hash ){
-	//string_proc_node* node = ( string_proc_node* )malloc( sizeof( string_proc_node ) );
-    //if ( node == NULL ) return NULL;
-    //node->type = type;
-    //node->hash = hash;        
-    //node->next = NULL;
-    //node->previous = NULL;
-    //return node;
-    string_proc_node* node = (string_proc_node*)malloc(sizeof(string_proc_node));
-    if (node == NULL) return NULL;
-
+	string_proc_node* node = malloc(sizeof(*node));
+    if (!node) {
+        fprintf(stderr, "Error: malloc falló en string_proc_node_create\n");
+        exit(1);
+    }
     node->type = type;
-    node->hash = hash;         // importante: no se copia, solo se apunta
+    node->hash = hash;
     node->next = NULL;
     node->previous = NULL;
-
     return node;
 }
 
 void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash ){
-    //if ( list == NULL ) return;
-    //string_proc_node* node = string_proc_node_create(type, hash);
-//
-    //if (list->first == NULL) {
-    //    // Lista vacía
-    //    list->first = node;
-    //    list->last = node;
-    //} else {
-    //    // Hay al menos un nodo
-    //    node->previous = list->last;
-    //    list->last->next = node;
-    //    list->last = node;
-    //}
-    if (list == NULL) return;
-
     string_proc_node* node = string_proc_node_create(type, hash);
-    if (node == NULL) return;
 
     if (list->first == NULL) {
         list->first = node;
@@ -66,42 +40,22 @@ void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash
 }
 
 char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash){
-    //if ( list == NULL || hash == NULL ) return NULL;
-    //string_proc_list_add_node(list, type, hash);
-//
-    //char* result = NULL;
-//
-    //string_proc_node* current = list->first;
-    //while (current != NULL) {
-    //    if (current->type == type) {
-    //        if (result == NULL) {
-    //            result = current->hash;
-    //        } else {
-    //            result = str_concat(result, current->hash);
-    //        }
-    //    }
-    //    current = current->next;
-    //}
-//
-    //return result;
-    if (list == NULL || hash == NULL) return NULL;
-    size_t total_len = strlen(hash); 
-    string_proc_node* current = list->first;
+    string_proc_list_add_node(list, type, hash);
 
-    for (; current != NULL; current = current->next) {
-        if (current->type == type && current->hash != NULL) {
-            total_len += strlen(current->hash);
-        }
+    char* result = strdup(hash);
+    if (!result) {
+        fprintf(stderr, "Error: malloc falló en string_proc_list_concat (strdup)\n");
+        exit(1);
     }
-    char* result = (char*)malloc(total_len + 1);
-    if (result == NULL) return NULL;
-    result[0] = '\0';  
-    strcat(result, hash);
-    current = list->first;
-    for (; current != NULL; current = current->next) {
-        if (current->type == type && current->hash != NULL) {
-            strcat(result, current->hash);
+
+    string_proc_node* current = list->first;
+    while (current != NULL) {
+        if (current->type == type) {
+            char* new_result = str_concat(result, current->hash);
+            free(result);
+            result = new_result;
         }
+        current = current->next;
     }
 
     return result;
