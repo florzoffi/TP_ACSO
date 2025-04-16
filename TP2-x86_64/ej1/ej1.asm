@@ -25,9 +25,34 @@ extern strcat
 extern fprintf
 extern exit
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; string_proc_list* string_proc_list_create_asm()
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+string_proc_list_create_asm:
+    push rbp
+    mov rbp, rsp
+
+    mov rdi, 16                ; sizeof(list) = 2 punteros
+    call malloc
+    test rax, rax
+    je .malloc_fail_list
+
+    mov qword [rax], 0         ; list->first = NULL
+    mov qword [rax + 8], 0     ; list->last = NULL
+
+    pop rbp
+    ret
+
+.malloc_fail_list:
+    mov edi, 1
+    mov rsi, err_list_create
+    call fprintf
+    mov edi, 1
+    call exit
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; string_proc_node* string_proc_node_create_asm(uint8_t type, char* hash)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 string_proc_node_create_asm:
     push rbp
     mov rbp, rsp
@@ -63,41 +88,9 @@ string_proc_node_create_asm:
     mov edi, 1
     call exit
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; string_proc_node* string_proc_node_create_asm(uint8_t type, char* hash)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-string_proc_node_create_asm:
-    push rbp
-    mov rbp, rsp
-
-    mov rdi, 32                ; sizeof(node) con padding
-    call malloc
-    test rax, rax
-    je .malloc_fail_node
-
-    ; args: dil = type, rsi = hash
-    mov rcx, rsi               ; guardar hash
-    movzx rdx, dil             ; type → 64 bits
-
-    mov qword [rax], 0         ; node->next = NULL
-    mov qword [rax + 8], 0     ; node->previous = NULL
-    mov qword [rax + 16], rcx  ; node->hash = hash
-    mov byte [rax + 24], dl    ; node->type
-
-    pop rbp
-    ret
-
-.malloc_fail_node:
-    mov edi, 1
-    mov rsi, err_node_create
-    call fprintf
-    mov edi, 1
-    call exit
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; void string_proc_list_add_node_asm(list*, type, hash*)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 string_proc_list_add_node_asm:
     push rbp
     mov rbp, rsp
@@ -127,9 +120,9 @@ string_proc_list_add_node_asm:
     pop rbp
     ret
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; char* string_proc_list_concat_asm(list*, type, hash*)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 string_proc_list_concat_asm:
     push rbp
     mov rbp, rsp
