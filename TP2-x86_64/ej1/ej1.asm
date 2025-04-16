@@ -28,26 +28,18 @@ extern exit
 ; string_proc_list* string_proc_list_create_asm()
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 string_proc_list_create_asm:
-    push rbp
-    mov rbp, rsp
-
+    push rdi
     mov rdi, 16
     call malloc
     test rax, rax
-    je .malloc_fail_list
+    jz .done
 
-    mov qword [rax], 0         ; list->first = NULL
-    mov qword [rax + 8], 0     ; list->last = NULL
+    mov qword [rax], 0
+    mov qword [rax + 8], 0
 
-    pop rbp
+.done:
+    pop rdi
     ret
-
-.malloc_fail_list:
-    mov edi, 1
-    mov rsi, err_list_create
-    call fprintf
-    mov edi, 1
-    call exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; string_proc_node* string_proc_node_create_asm(uint8_t type, char* hash)
@@ -55,26 +47,27 @@ string_proc_list_create_asm:
 string_proc_node_create_asm:
     push rbp
     mov rbp, rsp
+    push rbx
+    push r12
+
+    mov bl, sil
+    mov r12, rdx
 
     mov rdi, 32
     call malloc
     test rax, rax
-    je .malloc_fail_node
+    jz .done
 
-    mov qword [rax], 0         ; node->next = NULL
-    mov qword [rax + 8], 0     ; node->previous = NULL
-    mov byte [rax + 16], dil   ; node->type
-    mov qword [rax + 24], rsi  ; node->hash
+    mov qword [rax], 0
+    mov qword [rax + 8], 0
+    mov byte [rax + 16], bl
+    mov [rax + 24], r12
 
-    pop rbp
+.done:
+    pop r12
+    pop rbx
+    leave
     ret
-
-.malloc_fail_node:
-    mov edi, 1
-    mov rsi, err_node_create
-    call fprintf
-    mov edi, 1
-    call exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; void string_proc_list_add_node_asm(list*, type, hash*)
@@ -83,31 +76,37 @@ string_proc_list_add_node_asm:
     push rbp
     mov rbp, rsp
     push rbx
+    push r12
+    push r13
 
-    mov rbx, rdi              ; list
-    mov dil, sil              ; type
-    mov rsi, rdx              ; hash
+    mov rbx, rdi
+    mov r12b, sil
+    mov r13, rdx
+
+    movzx rsi, r12b
+    mov rdx, r13
     call string_proc_node_create_asm
     test rax, rax
-    je .done
+    jz .done
 
     cmp qword [rbx], 0
     jne .append
 
-    ; lista vacía
-    mov [rbx], rax           ; list->first = node
-    mov [rbx + 8], rax       ; list->last = node
+    mov [rbx], rax
+    mov [rbx + 8], rax
     jmp .done
 
 .append:
-    mov rcx, [rbx + 8]        ; rcx = list->last
-    mov [rcx], rax            ; list->last->next = node
-    mov [rax + 8], rcx        ; node->previous = list->last
-    mov [rbx + 8], rax        ; list->last = node
+    mov rcx, [rbx + 8]
+    mov [rcx], rax
+    mov [rax + 8], rcx
+    mov [rbx + 8], rax
 
 .done:
+    pop r13
+    pop r12
     pop rbx
-    pop rbp
+    leave
     ret
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -122,14 +121,16 @@ string_proc_list_concat_asm:
     push r14
     push r15
 
-    mov rbx, rdi              ; list
-    mov r12b, sil             ; type
-    mov r13, rdx              ; hash
+    mov rbx, rdi
+    mov r12d, esi
+    mov r13, rdx
 
-    ; agregar nodo
+    test rbx, rbx
+    jz .return_null
+
     mov dil, r12b
     mov rsi, r13
-    call string_proc_node_create_asm
+    mov rdi, rbx
     call string_proc_list_add_node_asm
 
     mov rdi, r13
@@ -137,52 +138,49 @@ string_proc_list_concat_asm:
     inc rax
     mov rdi, rax
     call malloc
-    test rax, rax
-    je .malloc_fail_concat
-
-    mov r15, rax              ; result
+    mov r15, rax
+    test r15, r15
+    jz .return_null
 
     mov rdi, r15
     mov rsi, r13
     call strcpy
 
-    mov r14, [rbx]            ; node = list->first
-
+    mov r14, [rbx]
 .loop:
     test r14, r14
-    je .done
+    jz .done
 
-    mov al, [r14 + 16]        ; node->type
-    cmp al, r12b
+    movzx eax, byte [r14 + 16]
+    cmp eax, r12d
     jne .next_node
 
-    mov rdi, r15              ; result
-    mov rsi, [r14 + 24]       ; node->hash
+    mov rdi, r15
+    mov rsi, [r14 + 24]
     call str_concat
     test rax, rax
-    je .next_node
+    jz .next_node
 
     mov rdi, r15
     mov r15, rax
     call free
 
 .next_node:
-    mov r14, [r14]            ; node = node->next
+    mov r14, [r14]
     jmp .loop
 
 .done:
     mov rax, r15
+    jmp .return
+
+.return_null:
+    xor eax, eax
+
+.return:
     pop r15
     pop r14
     pop r13
     pop r12
     pop rbx
-    pop rbp
+    leave
     ret
-
-.malloc_fail_concat:
-    mov edi, 1
-    mov rsi, err_concat
-    call fprintf
-    mov edi, 1
-    call exit
