@@ -26,29 +26,43 @@ extern fprintf
 extern exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; string_proc_list* string_proc_list_create_asm()
+; string_proc_node* string_proc_node_create_asm(uint8_t type, char* hash)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-string_proc_list_create_asm:
+string_proc_node_create_asm:
     push rbp
     mov rbp, rsp
 
-    mov rdi, 16                ; sizeof(list) = 2 punteros
+    ; malloc(sizeof(string_proc_node)) = 3*8 (punteros) + 1 (type) + padding = 32
+    mov rdi, 32
     call malloc
     test rax, rax
-    je .malloc_fail_list
+    je .malloc_fail_node
 
-    mov qword [rax], 0         ; list->first = NULL
-    mov qword [rax + 8], 0     ; list->last = NULL
+    ; args: dil = type (8-bit), rsi = hash
+    ; rax contiene el puntero al nodo nuevo
+
+    ; node->next = NULL
+    mov qword [rax], 0
+
+    ; node->previous = NULL
+    mov qword [rax + 8], 0
+
+    ; node->hash = hash (en rsi)
+    mov qword [rax + 16], rsi
+
+    ; node->type = dil (type)
+    mov byte [rax + 24], dil
 
     pop rbp
     ret
 
-.malloc_fail_list:
+.malloc_fail_node:
     mov edi, 1
-    mov rsi, err_list_create
+    mov rsi, err_node_create
     call fprintf
     mov edi, 1
     call exit
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; string_proc_node* string_proc_node_create_asm(uint8_t type, char* hash)
