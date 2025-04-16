@@ -1,0 +1,62 @@
+Fase 1
+Para comenzar a resolver la Fase 1, comencé seleccionando un input, elegido aleatoriamente. Como resultado, noté que la bomba explotaba después de ejecutar 
+un call, seguido por un test eax,eax y un jne explode_bomb. A partir de esto pude deducir que lo que se devolvía en eax después del call era lo que definía 
+si explotaba o no. Decidí entonces analizar qué es lo que hace esa función llamada dentro del call, que resultó ser strings_not_equal.
+Lo primero que logré interpretar a partir del análisis, fue que la función calcula el largo de las dos cadenas (una pasada en rdi y otra en rsi). Si los largos 
+coinciden, compara carácter por carácter. En contraparte, si hay alguna diferencia, devuelve 1. Por último, si son exactamente iguales, devuelve 0. 
+Teniendo en cuenta que posterior a eso se hacía un test eax, eax, y si no era 0 se detonaba la bomba, entendí que tenía que hacer que los strings dieran exactamente iguales.
+Entonces, volví a phase_1 y logré ver que lo que se le pasaba a rsi era una dirección, justo antes del call. Imprimí el contenido de esa
+dirección con x/s 0x4c9a58, y encontré que el string esperado era: “Los hermanos sean unidos porque esa es la ley primera porque si entre ellos se pelean los devoran los de ajuera”.
+Opté por poner esa frase como input y no explotó la bomba. Asimismo, confirmé que cualquier diferencia, aunque sea mínima, haría que explotara. 
+Con eso corroboré que la comparación es carácter por carácter, y que el input tiene que ser idéntico al string guardado en el binario.
+
+Fase 2
+Durante esta fase, se esperaban dos inputs numéricos. Inicialmente, intenté colocando cualquier par de números. Consecuentemente a esto, la bomba explotaba. 
+Ubiqué un breakpoint al principio de phase_2 y seguí el flujo. Después del call a una función llamada misterio, venía un cmp eax, 6, seguido de un salto 
+condicional. Eso me indicó que el objetivo de esa función era que devolviera exactamente el número 6.
+Al analizar la función misterio, dilucidé que tomaba tres parámetros: rdi, esi y edx, que correspondían al puntero a una estructura, una clave de búsqueda,
+y un contador que se iba incrementando recursivamente. A raíz de la lógica de la función, interpreté que se trataba de un recorrido en un árbol binario,
+pues verificaba si el nodo era nulo (test rdi, rdi) y luego accedía al valor del nodo (mov edx, DWORD PTR [rdi]), comparándolo con el valor de búsqueda. 
+Dependiendo del resultado, saltaba hacia la izquierda o derecha, incrementando un contador con add eax, 1.
+Inferí que la función misterio estaba contando la cantidad de pasos que le tomaba encontrar un valor dentro de un árbol binario, y que el valor esperado era 6.
+Mi hipótesis fue que el primer número del input representaba la dirección base del árbol (o un offset), y el segundo era la clave de búsqueda. 
+Probé primero con 0, pero la bomba explotaba inmediatamente. Continué con otros números hasta llegar a 2080, el cual me permitía seguir avanzando sin que la bomba explotara.
+Después empecé a probar distintas claves. Imprimía la secuencia de comparaciones y me fijaba cuándo se llegaba al ret eax con valor 6. 
+Conforme a ello, encontré que cuando el segundo input era -1, la función misterio efectivamente devolvía 6.
+
+Fase 3
+Al llegar a esta fase, percibí que el formato del input debía ser %s %d. Así interpreté que el input esperaba una palabra y un número entero. Puse a prueba 
+distintas combinaciones y verifiqué que si el número ingresado era menor o igual a 6, la bomba explotaba.
+Después de esa comprobación, al seguir el flujo, identifiqué que el programa llamaba a una función que leía desde el archivo palabras.txt. El archivo cargaba 
+una lista de palabras ordenadas alfabéticamente, y el código recorría esa serie, realizando una búsqueda binaria. Observando el comportamiento del programa y 
+cómo avanzaba por las comparaciones, detecté que el número ingresado representaba la cantidad de iteraciones que la búsqueda binaria necesitaba para encontrar 
+la palabra. Entonces, mi objetivo pasó a ser encontrar una palabra real del archivo palabras.txt cuya posición hiciera que el algoritmo la encontrara en 
+exactamente 10 pasos. Abrí el archivo y empecé a analizar su longitud y el orden de las palabras. Seleccioné abalisar y confirmé que una búsqueda binaria bien 
+implementada la localizaría en 10 iteraciones. Luego probé que si ingresaba otro número (por ejemplo 9 u 11) con la misma palabra, o una palabra distinta con 
+el mismo número, el programa detonaba. Eso me confirmó que tanto la palabra como el número de iteraciones debían coincidir exactamente con lo esperado por la 
+búsqueda binaria interna.
+
+Fase 4
+Esta fase requería un único string como input. Cualquier palabra que ingresaba hacía activar la bomba, así que empecé por desglosar la función phase_4 para 
+descifrar qué pasaba con ese string. Al seguir la ejecución, observé que el programa procesaba el input carácter por carácter, haciendo movzx para extraer 
+cada letra y luego aplicando operaciones aritméticas con ellas. El resultado final se acumulaba en un registro, y al final de todo se hacía una comparación 
+con el valor 50. Si el total no era 50, hacía estallar la bomba. A raíz de esto, consideré que cada letra se convertía a un valor numérico individual, y que la 
+suma de todos esos valores tenía que dar 50 exactos. Decidí comenzar a fijarme en qué valor se le asignaba a cada letra: algunas valían más que otras, lo cual 
+se podía ver al inspeccionar el acumulador después de cada iteración. Una vez que verifiqué ello, me enfoqué en construir combinaciones de letras que, sumadas 
+según ese sistema interno, dieran justo 50. Fui pasando por distintos strings de largo variable y ajustando letra por letra hasta que encontré una combinación 
+válida.
+
+Fase Secreta
+Después de desactivar las primeras cuatro fases, empecé a investigar si la bomba tenía una fase secreta. Al revisar phase_3, noté que el formato del
+__isoc99_sscanf era %s %d %s; pero hasta ese momento solo había ingresado dos valores. Me llamó la atención que se estaba esperando un tercer string, y más 
+abajo en el código se veía una comparación entre ese string y una cadena almacenada en memoria, usando strings_not_equal. Examiné la dirección contra la cual 
+se comparaba ese tercer string y vi que el valor esperado era: abrete_sesamo Incluí ese string como tercer parámetro del input de la Fase 3, y la ejecución
+avanzó hacia una nueva función llamada secret_phase, confirmando así que eso era lo necesario para habilitarla. En secret_phase, 
+el input esperado era un único número entero. Al seguir el flujo de ejecución, vi que llamaba a una función llamada fun7, que tenía 
+una lógica similar a un recorrido de árbol binario. En cada paso, se comparaba el número ingresado contra valores almacenados en 
+memoria, y dependiendo si era menor o mayor, se tomaba un camino distinto. Lo interesante, es que con cada comparación se iba 
+construyendo un resultado acumulado en rax, que al final de todo debía valer exactamente 3 para que no detonara la bomba. Para 
+entender qué valores se usaban y cómo evolucionaba rax, puse varios breakpoints dentro de fun7 y empecé a probar con diferentes 
+inputs, viendo qué camino tomaban y cuánto se acumulaba. Después de evaluar el patrón de decisiones que tomaba el árbol, 
+identifiqué que el valor 99 seguía un recorrido que producía exactamente el resultado esperado: se sumaban las cantidades justas 
+en cada paso y al final rax == 3.
