@@ -31,7 +31,7 @@ string_proc_list_create_asm:
     push rbp
     mov rbp, rsp
 
-    mov rdi, 16                ; sizeof(list) = 2 punteros
+    mov rdi, 16
     call malloc
     test rax, rax
     je .malloc_fail_list
@@ -83,13 +83,9 @@ string_proc_list_add_node_asm:
     push rbp
     mov rbp, rsp
     push rbx
-    push r12
 
     mov rbx, rdi              ; list
-    mov r12b, sil             ; type
-    mov rdx, rdx              ; hash ya está en rdx
-
-    movzx rsi, r12b           ; preparar arg para node_create
+    mov dil, sil              ; type
     mov rsi, rdx              ; hash
     call string_proc_node_create_asm
     test rax, rax
@@ -110,7 +106,6 @@ string_proc_list_add_node_asm:
     mov [rbx + 8], rax        ; list->last = node
 
 .done:
-    pop r12
     pop rbx
     pop rbp
     ret
@@ -131,6 +126,10 @@ string_proc_list_concat_asm:
     mov r12b, sil             ; type
     mov r13, rdx              ; hash
 
+    ; agregar nodo
+    mov dil, r12b
+    mov rsi, r13
+    call string_proc_node_create_asm
     call string_proc_list_add_node_asm
 
     mov rdi, r13
