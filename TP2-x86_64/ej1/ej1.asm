@@ -15,7 +15,6 @@ global string_proc_node_create_asm
 global string_proc_list_add_node_asm
 global string_proc_list_concat_asm
 
-; FUNCIONES auxiliares que pueden llegar a necesitar:
 extern malloc
 extern free
 extern str_concat
@@ -57,26 +56,15 @@ string_proc_node_create_asm:
     push rbp
     mov rbp, rsp
 
-    ; malloc(sizeof(string_proc_node)) = 3*8 (punteros) + 1 (type) + padding = 32
     mov rdi, 32
     call malloc
     test rax, rax
     je .malloc_fail_node
 
-    ; args: dil = type (8-bit), rsi = hash
-    ; rax contiene el puntero al nodo nuevo
-
-    ; node->next = NULL
-    mov qword [rax], 0
-
-    ; node->previous = NULL
-    mov qword [rax + 8], 0
-
-    ; node->hash = hash (en rsi)
-    mov qword [rax + 16], rsi
-
-    ; node->type = dil (type)
-    mov byte [rax + 24], dil
+    mov qword [rax], 0         ; node->next = NULL
+    mov qword [rax + 8], 0     ; node->previous = NULL
+    mov byte [rax + 16], dil   ; node->type
+    mov qword [rax + 24], rsi  ; node->hash
 
     pop rbp
     ret
@@ -94,29 +82,36 @@ string_proc_node_create_asm:
 string_proc_list_add_node_asm:
     push rbp
     mov rbp, rsp
+    push rbx
+    push r12
 
-    ; args: rdi = list, sil = type, rdx = hash
-    movzx edi, sil             ; type (para node_create)
-    mov rsi, rdx               ; hash
+    mov rbx, rdi              ; list
+    mov r12b, sil             ; type
+    mov rdx, rdx              ; hash ya está en rdx
+
+    movzx rsi, r12b           ; preparar arg para node_create
+    mov rsi, rdx              ; hash
     call string_proc_node_create_asm
-    mov rbx, rax               ; node
-
-    mov rax, [rdi]             ; list->first
     test rax, rax
-    je .lista_vacia
+    je .done
 
-    ; lista no vacía
-    mov rcx, [rdi + 8]         ; list->last
-    mov [rbx + 8], rcx         ; node->previous = list->last
-    mov [rcx], rbx             ; list->last->next = node
-    mov [rdi + 8], rbx         ; list->last = node
-    jmp .fin
+    cmp qword [rbx], 0
+    jne .append
 
-.lista_vacia:
-    mov [rdi], rbx             ; list->first = node
-    mov [rdi + 8], rbx         ; list->last = node
+    ; lista vacía
+    mov [rbx], rax           ; list->first = node
+    mov [rbx + 8], rax       ; list->last = node
+    jmp .done
 
-.fin:
+.append:
+    mov rcx, [rbx + 8]        ; rcx = list->last
+    mov [rcx], rax            ; list->last->next = node
+    mov [rax + 8], rcx        ; node->previous = list->last
+    mov [rbx + 8], rax        ; list->last = node
+
+.done:
+    pop r12
+    pop rbx
     pop rbp
     ret
 
@@ -126,16 +121,19 @@ string_proc_list_add_node_asm:
 string_proc_list_concat_asm:
     push rbp
     mov rbp, rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+    push r15
 
-    ; args: rdi=list, sil=type, rdx=hash
-    mov r9, rdi                ; guardar list
-    mov r10, rdx               ; guardar hash
+    mov rbx, rdi              ; list
+    mov r12b, sil             ; type
+    mov r13, rdx              ; hash
 
-    ; llamar a add_node
     call string_proc_list_add_node_asm
 
-    ; strlen(hash)
-    mov rdi, r10
+    mov rdi, r13
     call strlen
     inc rax
     mov rdi, rax
@@ -143,34 +141,43 @@ string_proc_list_concat_asm:
     test rax, rax
     je .malloc_fail_concat
 
-    mov r8, rax                ; result
+    mov r15, rax              ; result
 
-    ; strcpy(result, hash)
-    mov rdi, r8
-    mov rsi, r10
+    mov rdi, r15
+    mov rsi, r13
     call strcpy
 
-    mov rbx, [r9]              ; node = list->first
+    mov r14, [rbx]            ; node = list->first
 
 .loop:
-    test rbx, rbx
+    test r14, r14
     je .done
 
-    mov al, [rbx + 24]         ; node->type
-    cmp al, sil
-    jne .next
+    mov al, [r14 + 16]        ; node->type
+    cmp al, r12b
+    jne .next_node
 
-    mov rdi, r8                ; result
-    mov rsi, [rbx + 16]        ; node->hash
+    mov rdi, r15              ; result
+    mov rsi, [r14 + 24]       ; node->hash
     call str_concat
-    mov r8, rax                ; result = new result
+    test rax, rax
+    je .next_node
 
-.next:
-    mov rbx, [rbx]             ; node = node->next
+    mov rdi, r15
+    mov r15, rax
+    call free
+
+.next_node:
+    mov r14, [r14]            ; node = node->next
     jmp .loop
 
 .done:
-    mov rax, r8
+    mov rax, r15
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
     pop rbp
     ret
 
