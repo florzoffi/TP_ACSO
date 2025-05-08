@@ -62,8 +62,6 @@ char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash)
 /** AUX FUNCTIONS **/
 
 void string_proc_list_destroy(string_proc_list* list){
-
-	/* borro los nodos: */
 	string_proc_node* current_node	= list->first;
 	string_proc_node* next_node		= NULL;
 	while(current_node != NULL){
@@ -71,7 +69,6 @@ void string_proc_list_destroy(string_proc_list* list){
 		string_proc_node_destroy(current_node);
 		current_node	= next_node;
 	}
-	/*borro la lista:*/
 	list->first = NULL;
 	list->last  = NULL;
 	free(list);
@@ -109,4 +106,3 @@ void string_proc_list_print(string_proc_list* list, FILE* file){
                 current_node = current_node->next;
         }
 }
-
