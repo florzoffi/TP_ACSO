@@ -70,7 +70,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     int second = remaining % indirectPtrsPerBlock;
 
     unsigned int firstLevel[indirectPtrsPerBlock];
-    int bytesRead = diskimg_readsector(fs->dfd, inp->i_addr[7], firstLevel);
+    int bytesRead = diskimg_readsector(fs->dfd, inp->i_addr[8], firstLevel);
     if (bytesRead == -1) {
         return -1;
     }
