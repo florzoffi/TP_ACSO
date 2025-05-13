@@ -51,8 +51,13 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
         int indirectBlockIndex = blockNum / indirectPtrsPerBlock;
         int offset = blockNum % indirectPtrsPerBlock;
 
+        if (indirectBlockIndex >= 7) {
+            return -1;
+        }
+        
         unsigned int pointers[indirectPtrsPerBlock];
         int bytesRead = diskimg_readsector(fs->dfd, inp->i_addr[indirectBlockIndex], pointers);
+        
         if (bytesRead == -1) {
             return -1;
         }
