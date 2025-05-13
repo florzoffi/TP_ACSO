@@ -33,7 +33,7 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
 /**
  * TODO
  */
-int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {
+int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {  
     if ((inp->i_mode & IALLOC) == 0) {
         return -1;
     }
