@@ -33,7 +33,7 @@ int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
 /**
  * TODO
  */
-int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {  
+int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum) {
     if ((inp->i_mode & IALLOC) == 0) {
         return -1;
     }
@@ -54,10 +54,9 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
         if (indirectBlockIndex >= 7) {
             return -1;
         }
-        
+
         unsigned int pointers[indirectPtrsPerBlock];
         int bytesRead = diskimg_readsector(fs->dfd, inp->i_addr[indirectBlockIndex], pointers);
-        
         if (bytesRead == -1) {
             return -1;
         }
