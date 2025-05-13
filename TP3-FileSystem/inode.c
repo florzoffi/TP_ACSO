@@ -3,17 +3,20 @@
 #include <stdlib.h>
 #include "inode.h"
 #include "diskimg.h"
+#include "unixfilesystem.h"
+#include "filsys.h"
+
+#define INODES_PER_BLOCK (DISKIMG_SECTOR_SIZE / sizeof(struct inode))
 
 /**
  * TODO
  */
 int inode_iget(struct unixfilesystem *fs, int inumber, struct inode *inp) {
-    if (inumber < 1 || inumber > fs->superblock.isize * INODES_PER_BLOCK) {
+    if (inumber < 1 || inumber > fs->superblock.s_isize * INODES_PER_BLOCK) {
         return -1;
     }
 
     int inodeIndex = inumber - 1;
-
     int blockNum = INODE_START_SECTOR + inodeIndex / INODES_PER_BLOCK;
 
     struct inode inodes[INODES_PER_BLOCK];
