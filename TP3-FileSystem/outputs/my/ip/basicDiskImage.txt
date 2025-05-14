@@ -7,7 +7,7 @@ Inode 1 mode 0xc1ff size 128 checksum 6912f439bbaa9f454f309ff42e2b41b44b1e6ef5
 Inode 2 mode 0x91ff size 401808 checksum 35645fe30add5d7a35025ef79829e3a7d9b10376
 Inode 3 mode 0x91ff size 128000 checksum 601763c6227688400b8dab158b2abe57c77d13a3
 Inode 4 mode 0x81ff size 0 checksum da39a3ee5e6b4b0d3255bfef95601890afd80709
-Inode 5 mode 0x91ff size 7340032 checksum edea26498e62ba510b9bbdce60dd5358f723d795
+Inode 5 mode 0x91ff size 7340032 checksum 24ee64fc5a463d5cedfcab7348210610745f379a
 Inode 6 mode 0xc1ff size 80 checksum 5b29d817312b2b64bae3ffc2ccd40c09379f0b42
 Inode 7 mode 0x81ff size 33 checksum 7eb2739faae32f59409d5adf78fd5723918da98e
 Inode 8 mode 0x81ff size 24 checksum 6920928823d690e3c2cf827d93fe0b6664d940e3
@@ -22,7 +22,7 @@ Path / 1 mode 0xc1ff size 128 checksum 6912f439bbaa9f454f309ff42e2b41b44b1e6ef5
 Path /bigfile 2 mode 0x91ff size 401808 checksum 35645fe30add5d7a35025ef79829e3a7d9b10376
 Path /medfile 3 mode 0x91ff size 128000 checksum 601763c6227688400b8dab158b2abe57c77d13a3
 Path /o 4 mode 0x81ff size 0 checksum da39a3ee5e6b4b0d3255bfef95601890afd80709
-Path /verybig 5 mode 0x91ff size 7340032 checksum edea26498e62ba510b9bbdce60dd5358f723d795
+Path /verybig 5 mode 0x91ff size 7340032 checksum 24ee64fc5a463d5cedfcab7348210610745f379a
 Path /CVS 6 mode 0xc1ff size 80 checksum 5b29d817312b2b64bae3ffc2ccd40c09379f0b42
 Path /CVS/Root 7 mode 0x81ff size 33 checksum 7eb2739faae32f59409d5adf78fd5723918da98e
 Path /CVS/Repository 8 mode 0x81ff size 24 checksum 6920928823d690e3c2cf827d93fe0b6664d940e3

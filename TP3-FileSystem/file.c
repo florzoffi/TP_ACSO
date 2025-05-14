@@ -5,37 +5,23 @@
 #include "inode.h"
 #include "diskimg.h"
 
-int file_getblock(struct unixfilesystem *fs, int inumber, int blockNum, void *buf) {
-    if (fs == NULL || buf == NULL || inumber < 1 || blockNum < 0) {
-        return -1;
-    }
-
+int file_getblock( struct unixfilesystem *fs, int inumber, int blockNum, void *buf ) {
     struct inode in;
-    if (inode_iget(fs, inumber, &in) < 0) {
-        return -1;
+    if ( inode_iget( fs, inumber, &in ) < 0 ) { return -1; }
+
+    int filesize = inode_getsize( &in );
+    int numBlocks = ( filesize + DISKIMG_SECTOR_SIZE - 1 ) / DISKIMG_SECTOR_SIZE;
+    if ( blockNum < 0 || blockNum >= numBlocks ) { return -1; }
+
+    memset( buf, 0, DISKIMG_SECTOR_SIZE );
+    int sector = inode_indexlookup( fs, &in, blockNum );
+    if ( sector == 0 || sector >= fs->superblock.s_fsize ) { return 0; }
+    
+    int bytes = diskimg_readsector( fs->dfd, sector, buf );
+    if ( bytes != DISKIMG_SECTOR_SIZE ) { return 0; }
+    if ( blockNum == numBlocks - 1 ) {
+        int remainder = filesize % DISKIMG_SECTOR_SIZE;
+        if ( remainder != 0 ) { return remainder; }
     }
-
-    int fileSize = inode_getsize(&in);
-    int totalBlocks = (fileSize + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE;
-
-    if (blockNum >= totalBlocks) {
-        return -1;
-    }
-
-    memset(buf, 0, DISKIMG_SECTOR_SIZE);
-
-    int physicalBlock = inode_indexlookup(fs, &in, blockNum);
-    if (physicalBlock <= 0 || physicalBlock >= fs->superblock.s_fsize) {
-        return 0;
-    }
-
-    int readResult = diskimg_readsector(fs->dfd, physicalBlock, buf);
-    if (readResult != DISKIMG_SECTOR_SIZE) {
-        return 0;
-    }
-
-    int offset = blockNum * DISKIMG_SECTOR_SIZE;
-    int remaining = fileSize - offset;
-
-    return (remaining >= DISKIMG_SECTOR_SIZE) ? DISKIMG_SECTOR_SIZE : remaining;
+    return DISKIMG_SECTOR_SIZE;
 }

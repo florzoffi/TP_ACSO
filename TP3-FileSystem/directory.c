@@ -6,13 +6,8 @@
 #include <string.h>
 #include <assert.h>
 
-/**
- * TODO
- */
 int directory_findname(struct unixfilesystem *fs, const char *name, int dir_ino, struct direntv6 *result) {
-  if (fs == NULL || name == NULL || result == NULL || dir_ino < 1) {
-    return -1;
-}
+  if ( fs == NULL || name == NULL || result == NULL || dir_ino < 1 ) { return -1; }
 
 struct inode dir_inode;
 if (inode_iget(fs, dir_ino, &dir_inode) < 0) {
