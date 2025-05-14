@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include "inode.h"
 #include "diskimg.h"
 #include "unixfilesystem.h"
 #include "filsys.h"
-#include <stddef.h> 
 
 #define INODES_PER_BLOCK (DISKIMG_SECTOR_SIZE / sizeof(struct inode))
 
@@ -38,9 +38,9 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
         addr[i] = inp->i_addr[i];
     }
 
-    // Leer manualmente el noveno puntero (i_addr[8]) si está en disco
-    // Asumimos que struct inode está correctamente alineado, como en disco
-    addr[8] = *((uint16_t *)(((char *)inp) + offsetof(struct inode, i_addr) + 8 * sizeof(uint16_t)));
+    const char *raw = (const char *)inp;
+    size_t offset_bytes = offsetof(struct inode, i_addr) + 8 * sizeof(uint16_t);
+    addr[8] = *((const uint16_t *)(raw + offset_bytes));
 
     if ((inp->i_mode & ILARG) == 0) {
         if (blockNum >= 8) return -1;
@@ -62,7 +62,10 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     }
 
     int remaining = blockNum - 7 * ptrsPerBlock;
-    if (remaining >= ptrsPerBlock * ptrsPerBlock || addr[8] == 0) return -1;
+
+    if (remaining >= ptrsPerBlock * ptrsPerBlock || addr[8] == 0 || addr[8] >= fs->superblock.s_fsize) {
+        return -1;
+    }
 
     int outer = remaining / ptrsPerBlock;
     int inner = remaining % ptrsPerBlock;
@@ -70,7 +73,7 @@ int inode_indexlookup(struct unixfilesystem *fs, struct inode *inp, int blockNum
     uint16_t firstLevel[ptrsPerBlock];
     if (diskimg_readsector(fs->dfd, addr[8], firstLevel) == -1) return -1;
 
-    if (firstLevel[outer] == 0) return -1;
+    if (firstLevel[outer] == 0 || firstLevel[outer] >= fs->superblock.s_fsize) return -1;
 
     uint16_t secondLevel[ptrsPerBlock];
     if (diskimg_readsector(fs->dfd, firstLevel[outer], secondLevel) == -1) return -1;
