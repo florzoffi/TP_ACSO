@@ -16,6 +16,7 @@
 int chksumfile_byinumber(struct unixfilesystem *fs, int inumber, void *chksum) {
   SHA_CTX shactx;
   if (!SHA1_Init(&shactx)) {
+    // An error occurred initializing the SHA1 context.
     return -1;
   }
 
@@ -26,6 +27,7 @@ int chksumfile_byinumber(struct unixfilesystem *fs, int inumber, void *chksum) {
   }
 
   if (!(in.i_mode & IALLOC)) {
+    // The inode isn't allocated, so we can't hash it.
     return -1;
   }
 

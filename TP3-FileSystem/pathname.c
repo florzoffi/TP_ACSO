@@ -11,19 +11,19 @@
  * TODO
  */
 int pathname_lookup(struct unixfilesystem *fs, const char *pathname) {
-    if (pathname == NULL || pathname[0] != '/') {
-        return -1; 
+    if (fs == NULL || pathname == NULL || pathname[0] != '/') {
+        return -1;
     }
 
-    char pathCopy[strlen(pathname) + 1];
-    strcpy(pathCopy, pathname);
+    char pathCopy[1024];
+    snprintf(pathCopy, sizeof(pathCopy), "%s", pathname);
 
     int currentInode = 1;
+    struct direntv6 entry;
 
     char *token = strtok(pathCopy, "/");
     while (token != NULL) {
-        struct direntv6 entry;
-        if (directory_findname(fs, token, currentInode, &entry) == -1) {
+        if (directory_findname(fs, token, currentInode, &entry) < 0) {
             return -1;
         }
 

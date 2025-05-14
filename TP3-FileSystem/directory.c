@@ -9,29 +9,40 @@
 /**
  * TODO
  */
-int directory_findname(struct unixfilesystem *fs, const char *name, int dirinumber, struct direntv6 *dirEnt) {
-  struct inode in;
-  if (inode_iget(fs, dirinumber, &in) == -1) {
-      return -1;
-  }
-  if ((in.i_mode & IFMT) != IFDIR) {
-      return -1;
-  }
-  int fileSize = inode_getsize(&in);
-  int totalBlocks = (fileSize + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE;
-  for (int b = 0; b < totalBlocks; b++) {
-      struct direntv6 block[DISKIMG_SECTOR_SIZE / sizeof(struct direntv6)];
-      int bytes = file_getblock(fs, dirinumber, b, block);
-      if (bytes == -1) {
-          return -1;
-      }
-      int entries = bytes / sizeof(struct direntv6);
-      for (int i = 0; i < entries; i++) {
-          if (strncmp(name, block[i].d_name, sizeof(block[i].d_name)) == 0) {
-              *dirEnt = block[i];
-              return 0;
-          }
-      }
-  }
-  return -1; 
+int directory_findname(struct unixfilesystem *fs, const char *name, int dir_ino, struct direntv6 *result) {
+  if (fs == NULL || name == NULL || result == NULL || dir_ino < 1) {
+    return -1;
+}
+
+struct inode dir_inode;
+if (inode_iget(fs, dir_ino, &dir_inode) < 0) {
+    return -1;
+}
+
+if ((dir_inode.i_mode & IFMT) != IFDIR) {
+    return -1;
+}
+
+int size_bytes = inode_getsize(&dir_inode);
+int total_blocks = (size_bytes + DISKIMG_SECTOR_SIZE - 1) / DISKIMG_SECTOR_SIZE;
+
+for (int blk = 0; blk < total_blocks; blk++) {
+    char buffer[DISKIMG_SECTOR_SIZE];
+    int read_bytes = file_getblock(fs, dir_ino, blk, buffer);
+    if (read_bytes < 0) {
+        return -1;
+    }
+
+    int entry_count = read_bytes / sizeof(struct direntv6);
+    struct direntv6 *entries = (struct direntv6 *) buffer;
+
+    for (int j = 0; j < entry_count; j++) {
+        if (strncmp(name, entries[j].d_name, sizeof(entries[j].d_name)) == 0) {
+            *result = entries[j];
+            return 0;
+        }
+    }
+}
+
+return -1;
 }
