@@ -56,7 +56,7 @@ int main( int argc, char **argv ) {
     int resultado_final;
     read( pipe_final[0], &resultado_final, sizeof( int ) );
     close( pipe_final[0] );
-    printf( "El resultado es: %d\n", resultado_final );
+    printf( "Resultado final: %d\n", resultado_final );
     
     for ( int i = 0; i < n; i++ ) { wait( NULL ); }
     return 0;
