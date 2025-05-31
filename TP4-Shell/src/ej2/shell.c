@@ -5,7 +5,15 @@
 #include <string.h>
 
 #define MAX_COMMANDS 200
-#define MAX_ARGS 64
+#define MAX_ARGS 200
+
+void remove_quotes(char *arg) {
+    size_t len = strlen(arg);
+    if (len >= 2 && ((arg[0] == '"' && arg[len - 1] == '"') || (arg[0] == '\'' && arg[len - 1] == '\''))) {
+        memmove(arg, arg + 1, len - 2);
+        arg[len - 2] = '\0';
+    }
+}
 
 int main() {
     char command[256];
@@ -16,12 +24,17 @@ int main() {
         fflush(stdout);
 
         if (fgets(command, sizeof(command), stdin) == NULL)
-            break; 
+            break;
 
         command[strcspn(command, "\n")] = '\0';
 
         if (strcmp(command, "exit") == 0)
             break;
+
+        if (strstr(command, "||") != NULL) {
+            fprintf(stderr, "Syntax error\n");
+            continue;
+        }
 
         if (command[0] == '|' || command[strlen(command) - 1] == '|') {
             fprintf(stderr, "Syntax error\n");
@@ -67,7 +80,6 @@ int main() {
                         exit(1);
                     }
                 }
-                
                 if (i != command_count - 1) {
                     if (dup2(pipes[i][1], STDOUT_FILENO) == -1) {
                         perror("dup2");
@@ -75,18 +87,17 @@ int main() {
                     }
                 }
 
-                
                 for (int j = 0; j < command_count - 1; j++) {
                     close(pipes[j][0]);
                     close(pipes[j][1]);
                 }
 
-                
                 char *args[MAX_ARGS + 1];
                 int arg_count = 0;
                 char *arg = strtok(commands[i], " \t");
                 while (arg != NULL) {
-                    if (arg_count == MAX_ARGS) {
+                    remove_quotes(arg);
+                    if (arg_count >= MAX_ARGS) {
                         fprintf(stderr, "Too many arguments\n");
                         exit(1);
                     }
@@ -105,19 +116,15 @@ int main() {
                 exit(1);
             }
         }
-
-        
         for (int i = 0; i < command_count - 1; i++) {
             close(pipes[i][0]);
             close(pipes[i][1]);
         }
 
-    
         for (int i = 0; i < command_count; i++) {
             int status;
             wait(&status);
         }
     }
-
     return 0;
 }
