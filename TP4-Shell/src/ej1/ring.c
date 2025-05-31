@@ -9,16 +9,21 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    int n = atoi(argv[1]);      
-    int valor_inicial = atoi(argv[2]); 
-    int start = atoi(argv[3]);    
+    int n = atoi(argv[1]);
+    int valor_inicial = atoi(argv[2]);
+    int start = atoi(argv[3]);
 
-    if ( start >= n ) {
+    if (n < 3) {
+        fprintf(stderr, "Error: debe haber al menos 3 procesos para formar un anillo\n");
+        exit(1);
+    }
+
+    if (start >= n) {
         printf("Indice de inicio fuera de rango\n");
         exit(1);
     }
 
-    if ( start < 0 ) {
+    if (start < 0) {
         printf("Indice de inicio negativo\n");
         exit(1);
     }
@@ -56,10 +61,8 @@ int main(int argc, char **argv) {
 
             valor++;
             if (i == (start + n - 1) % n) {
-
                 write(pipe_final[1], &valor, sizeof(int));
             } else {
-
                 write(pipes[(i + 1) % n][1], &valor, sizeof(int));
             }
 
@@ -68,23 +71,20 @@ int main(int argc, char **argv) {
     }
 
     for (int i = 0; i < n; i++) {
-        if (i != start) close(pipes[i][1]); 
+        if (i != start) close(pipes[i][1]);
         close(pipes[i][0]);
     }
     close(pipe_final[1]);
 
-    
     write(pipes[start][1], &valor_inicial, sizeof(int));
     close(pipes[start][1]);
 
-    
     int resultado_final;
     read(pipe_final[0], &resultado_final, sizeof(int));
     close(pipe_final[0]);
 
     printf("Resultado final: %d\n", resultado_final);
 
-    
     for (int i = 0; i < n; i++) {
         wait(NULL);
     }
