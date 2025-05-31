@@ -31,31 +31,17 @@ int main() {
         if (strcmp(command, "exit") == 0)
             break;
 
-        if (strstr(command, "||") != NULL) {
-            fprintf(stderr, "Syntax error\n");
-            continue;
-        }
-
-        if (command[0] == '|' || command[strlen(command) - 1] == '|') {
-            fprintf(stderr, "Syntax error\n");
-            continue;
-        }
-
         int command_count = 0;
         char *token = strtok(command, "|");
         while (token != NULL) {
             while (*token == ' ') token++;
             if (*token == '\0') {
-                fprintf(stderr, "Syntax error\n");
                 command_count = 0;
                 break;
             }
             commands[command_count++] = token;
             token = strtok(NULL, "|");
         }
-
-        if (command_count == 0)
-            continue;
 
         int pipes[command_count - 1][2];
         for (int i = 0; i < command_count - 1; i++) {
@@ -99,7 +85,6 @@ int main() {
                     remove_quotes(arg);
                     args[arg_count++] = arg;
                     if (arg_count > MAX_ARGS) {
-                        fprintf(stderr, "Too many arguments\n");
                         exit(1);
                     }
                     arg = strtok(NULL, " \t");
@@ -107,16 +92,14 @@ int main() {
                 args[arg_count] = NULL;
 
                 if (arg_count == 0) {
-                    fprintf(stderr, "Syntax error\n");
                     exit(1);
                 }
 
                 execvp(args[0], args);
-                fprintf(stderr, "command not found\n");
                 exit(1);
             }
         }
-        
+
         for (int i = 0; i < command_count - 1; i++) {
             close(pipes[i][0]);
             close(pipes[i][1]);
