@@ -97,11 +97,11 @@ int main() {
                 char *arg = strtok(commands[i], " \t");
                 while (arg != NULL) {
                     remove_quotes(arg);
-                    if (arg_count >= MAX_ARGS) {
+                    args[arg_count++] = arg;
+                    if (arg_count > MAX_ARGS) {
                         fprintf(stderr, "Too many arguments\n");
                         exit(1);
                     }
-                    args[arg_count++] = arg;
                     arg = strtok(NULL, " \t");
                 }
                 args[arg_count] = NULL;
@@ -116,6 +116,7 @@ int main() {
                 exit(1);
             }
         }
+        
         for (int i = 0; i < command_count - 1; i++) {
             close(pipes[i][0]);
             close(pipes[i][1]);
