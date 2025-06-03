@@ -34,7 +34,6 @@ void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash
 
 char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash){
     if ( !list || !hash ) return NULL;
-    string_proc_list_add_node(list, type, hash);
 
     char* result = malloc(strlen(hash) + 1);
     if (!result) {
