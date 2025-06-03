@@ -23,11 +23,9 @@ void string_proc_list_add_node( string_proc_list* list, uint8_t type, char* hash
     string_proc_node* node = string_proc_node_create(type, hash);
 
     if (list->first == NULL) {
-        // Lista vacía
         list->first = node;
         list->last = node;
     } else {
-        // Hay al menos un nodo
         node->previous = list->last;
         list->last->next = node;
         list->last = node;
@@ -49,7 +47,7 @@ char* string_proc_list_concat(string_proc_list* list, uint8_t type , char* hash)
     while (current != NULL) {
         if (current->type == type) {
             char* new_result = str_concat(result, current->hash);
-            free(result);  // ✅ liberamos la anterior
+            free(result); 
             result = new_result;
         }
         current = current->next;
