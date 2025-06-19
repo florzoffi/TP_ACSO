@@ -1,3 +1,148 @@
+/**
+ * File: tpcustomtest.cc
+ * ---------------------
+ * Unit tests *you* write to exercise the ThreadPool in a variety
+ * of ways.
+ */
+
+//#include <iostream>
+//#include <sstream>
+//#include <map>
+//#include <string>
+//#include <functional>
+//#include <cstring>
+//#include <mutex>
+//#include <sys/types.h> // used to count the number of threads
+//#include <unistd.h>    // used to count the number of threads
+//#include <dirent.h>    // for opendir, readdir, closedir
+//
+//#include "thread-pool.h"
+//
+//
+//using namespace std;
+//
+//void sleep_for(int slp){
+//    this_thread::sleep_for(chrono::milliseconds(slp));
+//}
+//
+//static mutex oslock;
+//
+//static const size_t kNumThreads = 4;
+//static const size_t kNumFunctions = 10;
+//static void simpleTest() {
+//  ThreadPool pool(kNumThreads);
+//  for (size_t id = 0; id < kNumFunctions; id++) {
+//    pool.schedule([id] {
+//      oslock.lock();
+//      cout << "Thread (ID: " << id << ") has started." << endl;
+//      oslock.unlock();
+//      size_t sleepTime = (id % 3) * 10;
+//      sleep_for(sleepTime);
+//      oslock.lock();
+//      cout <<  "Thread (ID: " << id << ") has finished." << endl ;
+//      oslock.unlock();
+//    });
+//  }
+//
+//  pool.wait();
+//}
+//
+//
+//static void singleThreadNoWaitTest() {
+//    ThreadPool pool(4);
+//
+//    pool.schedule([&] {
+//        oslock.lock();
+//        cout << "This is a test." << endl;
+//        oslock.unlock();
+//    });
+//    sleep_for(1000); // emulate wait without actually calling wait (that's a different test)
+//}
+//
+//static void singleThreadSingleWaitTest() {
+//    ThreadPool pool(4);
+//    pool.schedule([] {
+//        oslock.lock();
+//        cout << "This is a test." << endl;
+//        oslock.unlock();
+//        sleep_for(1000);
+//    });
+//}
+//
+//static void noThreadsDoubleWaitTest() {
+//    ThreadPool pool(4);
+//    pool.wait();
+//    pool.wait();
+//}
+//
+//static void reuseThreadPoolTest() {
+//    ThreadPool pool(4);
+//    for (size_t i = 0; i < 16; i++) {
+//        pool.schedule([] {
+//            oslock.lock();
+//            cout << "This is a test." << endl;
+//            oslock.unlock();
+//            sleep_for(50);
+//        });
+//    }
+//    pool.wait();
+//    pool.schedule([] {
+//        oslock.lock();
+//        cout << "This is a code." << endl;
+//        oslock.unlock();
+//        sleep_for(1000);
+//    }); 
+//    pool.wait();
+//}
+//
+//struct testEntry {
+//    string flag;
+//    function<void(void)> testfn;
+//};
+//
+//static void buildMap(map<string, function<void(void)>>& testFunctionMap) {
+//    testEntry entries[] = {
+//        {"--single-thread-no-wait", singleThreadNoWaitTest},
+//        {"--single-thread-single-wait", singleThreadSingleWaitTest},
+//        {"--no-threads-double-wait", noThreadsDoubleWaitTest},
+//        {"--reuse-thread-pool", reuseThreadPoolTest},
+//        {"--s", simpleTest},
+//    };
+//
+//    for (const testEntry& entry: entries) {
+//        testFunctionMap[entry.flag] = entry.testfn;
+//    }
+//}
+//
+//static void executeAll(const map<string, function<void(void)>>& testFunctionMap) {
+//    for (const auto& entry: testFunctionMap) {
+//        cout << entry.first << ":" << endl;
+//        entry.second();
+//    }
+//}
+//
+//int main(int argc, char **argv) {
+//    if (argc != 2) {
+//        cout << "Ouch! I need exactly two arguments." << endl;
+//        return 0;
+//    }
+//
+//    map<string, function<void(void)>> testFunctionMap;
+//    buildMap(testFunctionMap);
+//    string flag = argv[1];
+//    if (flag == "--all") {
+//        executeAll(testFunctionMap);
+//        return 0;
+//    }
+//    auto found = testFunctionMap.find(argv[1]);
+//    if (found == testFunctionMap.end()) {
+//        cout << "Oops... we don't recognize the flag \"" << argv[1] << "\"." << endl;
+//        return 0;
+//    }
+//
+//    found->second();
+//    return 0;
+//}
 #if defined(__has_include)
   #if __has_include(<valgrind/helgrind.h>)
     #include <valgrind/helgrind.h>
@@ -8,7 +153,7 @@
 #else
   #define RUNNING_ON_HELGRIND 0
 #endif
-
+#include <array>
 #include "thread-pool.h"
 #include <iostream>
 #include <vector>
@@ -24,7 +169,6 @@
 #include <unistd.h>    // fork
 #include <map>
 #include <algorithm>
-#include <array>
 
 using namespace std;
 using namespace chrono;
@@ -57,24 +201,18 @@ bool running_on_helgrind() {
 bool test_basic() {
     try {
         ThreadPool pool(2);
-        vector<int> result(3, 0);
-        mutex result_mutex;
-        
+        vector < int > result(3, 0);
         for (int i = 0; i < 3; ++i) {
-            pool.schedule([i, &result, &result_mutex]() {
-                lock_guard<mutex> lock(result_mutex);
+            pool.schedule([i, & result]() {
                 result[i] = i + 1;
             });
         }
         pool.wait();
-        
-        // Protect the read operation too!
-        bool success;
-        {
-            lock_guard<mutex> lock(result_mutex);
-            success = (result == vector<int>({1, 2, 3}));
-        }
-        return success;
+        return result == vector < int > ({
+            1,
+            2,
+            3
+        });
     } catch (...) {
         return false;
     }
@@ -96,20 +234,13 @@ bool test_serial_execution() {
         mutex mtx;
         ThreadPool pool(1);
         for (int i = 0; i < 5; ++i) {
-            pool.schedule([i, &log, &mtx]() {
-                lock_guard<mutex> l(mtx);
+            pool.schedule([i, & log, & mtx]() {
+                lock_guard < mutex > l(mtx);
                 log << i << " ";
             });
         }
         pool.wait();
-        
-        // Protect the read operation too
-        string result;
-        {
-            lock_guard<mutex> l(mtx);
-            result = log.str();
-        }
-        return result == "0 1 2 3 4 ";
+        return log.str() == "0 1 2 3 4 ";
     } catch (...) {
         return false;
     }
@@ -117,25 +248,21 @@ bool test_serial_execution() {
 
 bool test_fifo_single_thread() {
     try {
-        ThreadPool pool(1);
-        vector<int> log;
+        ThreadPool pool(1); // un solo thread garantiza orden estricto
+        vector < int > log;
         mutex mtx;
 
         for (int i = 0; i < 10; ++i) {
-            pool.schedule([i, &log, &mtx]() {
-                lock_guard<mutex> lock(mtx);
+            pool.schedule([i, & log, & mtx]() {
+                lock_guard < mutex > lock(mtx);
                 log.push_back(i);
             });
         }
 
         pool.wait();
 
-        // Protect the read operations too!
-        {
-            lock_guard<mutex> lock(mtx);
-            for (int i = 0; i < 10; ++i) {
-                if (log[i] != i) return false;
-            }
+        for (int i = 0; i < 10; ++i) {
+            if (log[i] != i) return false;
         }
         return true;
     } catch (...) {
@@ -150,24 +277,16 @@ bool test_fifo_single_thread() {
 bool test_concurrent_stress() {
     try {
         const int N = 1000;
-        vector<atomic<int>> counter(N);  // Use atomic elements
+        vector < int > counter(N, 0);
         ThreadPool pool(8);
-        
-        // Initialize atomic elements
         for (int i = 0; i < N; ++i) {
-            counter[i] = 0;
-        }
-        
-        for (int i = 0; i < N; ++i) {
-            pool.schedule([i, &counter]() {
+            pool.schedule([i, & counter]() {
                 counter[i] = 1;
             });
         }
         pool.wait();
-        
-        for (int i = 0; i < N; ++i) {
-            if (counter[i].load() != 1) return false;
-        }
+        for (int v: counter)
+            if (v != 1) return false;
         return true;
     } catch (...) {
         return false;
@@ -177,20 +296,18 @@ bool test_concurrent_stress() {
 bool test_reuse_pool() {
     try {
         ThreadPool pool(4);
-        atomic<bool> ok{false};  // Use atomic
-        
-        pool.schedule([&]() {
+        bool ok = false;
+        pool.schedule([ & ]() {
             ok = true;
         });
         pool.wait();
-        if (!ok.load()) return false;
-        
+        if (!ok) return false;
         ok = false;
-        pool.schedule([&]() {
+        pool.schedule([ & ]() {
             ok = true;
         });
         pool.wait();
-        return ok.load();
+        return ok;
     } catch (...) {
         return false;
     }
@@ -288,28 +405,21 @@ bool test_potential_deadlock() {
                 mtx.unlock();
             }
 
+            // Interpretar el resultado
             if (!locked && !ready.load()) {
-                {
-                    lock_guard<mutex> lock(done_mutex);
-                    finished = true;
-                    done_cv.notify_one();
-                }
+                // Se detectó un posible deadlock
+                finished = true;
+                done_cv.notify_one();
                 return;
             }
 
-            pool.wait();
-            {
-                lock_guard<mutex> lock(done_mutex);
-                finished = true;
-                done_cv.notify_one();
-            }
+            pool.wait();  // en caso normal
+            finished = true;
+            done_cv.notify_one();
 
         } catch (...) {
-            {
-                lock_guard<mutex> lock(done_mutex);
-                finished = false;
-                done_cv.notify_one();
-            }
+            finished = false;
+            done_cv.notify_one();
         }
     });
 
@@ -391,30 +501,26 @@ bool test_schedule_after_destruction() {
 }
 
 bool test_schedule_inside_task() {
-    try {
-        ThreadPool pool(4);
-        atomic<int> count(0);
-        atomic<bool> ready(false);
+    ThreadPool pool(4);
+    atomic<int> count(0);
+    atomic<bool> ready(false);
 
+    pool.schedule([&]() {
+        count++;
         pool.schedule([&]() {
-            count.fetch_add(1, memory_order_relaxed);
-            pool.schedule([&]() {
-                count.fetch_add(1, memory_order_relaxed);
-                ready.store(true, memory_order_release);
-            });
+            count++;
+            ready = true;
         });
+    });
 
-        // Wait until the inner task indicates completion
-        for (int i = 0; i < 100; ++i) {
-            if (ready.load(memory_order_acquire)) break;
-            this_thread::sleep_for(chrono::milliseconds(10));
-        }
-
-        pool.wait();
-        return count.load() == 2 && ready.load();
-    } catch (...) {
-        return false;
+    // Esperamos hasta que se indique que la tarea interna terminó
+    for (int i = 0; i < 100; ++i) {
+        if (ready.load()) break;
+        this_thread::sleep_for(chrono::milliseconds(10));
     }
+
+    pool.wait();
+    return count == 2 && ready.load();
 }
 
 bool test_wait_blocks_until_finish() {
