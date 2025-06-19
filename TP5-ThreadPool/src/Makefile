@@ -14,7 +14,7 @@ $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 custom:
-	$(CXX) $(CXXFLAGS) -o $(TARGET) thread-pool.cc Semaphore.cc test_custom.cc
+	$(CXX) $(CXXFLAGS) -o threadpool thread-pool.cc Semaphore.cc test_custom.cc
 
 # Clean up build artifacts
 clean:
