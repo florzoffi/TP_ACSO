@@ -82,6 +82,7 @@ class ThreadPool {
     condition_variable_any taskAvailableCV;    
     atomic<int> activeTasks{0};                
     condition_variable_any noTasksLeftCV;      
+    atomic<bool> destroyed{false};
 
     /* It is incomplete, there should be more private variables to manage the structures... 
     * *

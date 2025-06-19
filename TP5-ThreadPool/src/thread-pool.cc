@@ -72,6 +72,12 @@ void ThreadPool::worker(int id) {
 }
 
 void ThreadPool::schedule(const function<void(void)>& thunk) {
+    if (destroyed) {
+        throw runtime_error("Cannot schedule after ThreadPool is destroyed");
+    }
+    if (!thunk) {
+        throw invalid_argument("Cannot schedule a null function");
+    }
     {
         lock_guard<mutex> lock(queueLock);
         taskQueue.push(thunk);
@@ -100,5 +106,6 @@ ThreadPool::~ThreadPool() {
     for (auto& w : wts) {
         w.sem.signal();    
         if (w.ts.joinable()) w.ts.join();
+        destroyed = true;
     }
 }
