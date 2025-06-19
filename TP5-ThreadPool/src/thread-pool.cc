@@ -67,7 +67,7 @@ void ThreadPool::worker( int id ) {
             wts[id].thunk = nullptr;
             wts[id].busy = false;
         }
-        
+
         if (done && !job) break;
         job();
 
@@ -91,6 +91,7 @@ void ThreadPool::schedule( const function<void( void )>& thunk ) {
 }
 
 void ThreadPool::wait() {
+    lock_guard<mutex> outer( waitMutex );
     unique_lock<mutex> lock( queueLock );
     noTasksLeftCV.wait( lock, [this]() { return activeTasks == 0 && taskQueue.empty(); } );
 }
