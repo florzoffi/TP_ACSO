@@ -7,11 +7,98 @@
 #include "thread-pool.h"
 using namespace std;
 
-ThreadPool::ThreadPool(size_t numThreads) : wts(numThreads), done(false) {}
+ThreadPool::ThreadPool(size_t numThreads) : wts(numThreads), done(false) {
+    dt = thread([this] { dispatcher(); });
 
+    for (size_t i = 0; i < numThreads; ++i) {
+        wts[i].ts = thread([this, i] { worker(i); });
+    }
+}
 
-void ThreadPool::schedule(const function<void(void)>& thunk) {}
+void ThreadPool::dispatcher() {
+    while (true) {
+        unique_lock<mutex> lock(queueLock);
 
-void ThreadPool::wait() {}
+        taskAvailableCV.wait(lock, [this]() {
+            return !taskQueue.empty() || done;
+        });
 
-ThreadPool::~ThreadPool() {}
+        if (done && taskQueue.empty()) return;
+
+        size_t workerId = 0;
+        bool found = false;
+
+        while (!found) {
+            for (size_t i = 0; i < wts.size(); ++i) {
+                if (!wts[i].busy) {
+                    workerId = i;
+                    wts[i].busy = true;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                lock.unlock();
+                this_thread::yield();
+                lock.lock();
+            }
+        }
+
+        wts[workerId].thunk = taskQueue.front();
+        taskQueue.pop();
+        activeTasks++;
+
+        lock.unlock();
+        wts[workerId].sem.signal();
+    }
+}
+
+void ThreadPool::worker(int id) {
+    while (true) {
+        wts[id].sem.wait();
+
+        if (done && !wts[id].thunk) break;
+
+        wts[id].thunk();
+
+        wts[id].thunk = nullptr;
+        wts[id].busy = false;
+
+        activeTasks--;
+        if (activeTasks == 0 && taskQueue.empty()) {
+            noTasksLeftCV.notify_all();
+        }
+    }
+}
+
+void ThreadPool::schedule(const function<void(void)>& thunk) {
+    {
+        lock_guard<mutex> lock(queueLock);
+        taskQueue.push(thunk);
+    }
+    taskAvailableCV.notify_all();
+}
+
+void ThreadPool::wait() {
+    unique_lock<mutex> lock(queueLock);
+    noTasksLeftCV.wait(lock, [this]() {
+        return activeTasks == 0 && taskQueue.empty();
+    });
+}
+
+ThreadPool::~ThreadPool() {
+    wait(); 
+
+    {
+        lock_guard<mutex> lock(queueLock);
+        done = true;
+    }
+
+    taskAvailableCV.notify_all();
+    if (dt.joinable()) dt.join();
+
+    for (auto& w : wts) {
+        w.sem.signal();    
+        if (w.ts.joinable()) w.ts.join();
+    }
+}
