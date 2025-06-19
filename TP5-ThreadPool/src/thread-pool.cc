@@ -9,10 +9,8 @@
 using namespace std;
 
 ThreadPool::ThreadPool( size_t numThreads ) : wts( numThreads ), done( false ) {
-    dt = thread( [this] { dispatcher(); } );
-
-    for ( size_t i = 0; i < numThreads; ++i ) {
-        wts[i].ts = thread( [this, i] { worker( i ); } );
+    for (size_t i = 0; i < numThreads; ++i) {
+        wts[i].ts = thread([this, i] { worker(i); });
     }
 }
 
