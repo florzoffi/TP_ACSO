@@ -16,63 +16,29 @@ ThreadPool::ThreadPool( size_t numThreads ) : wts( numThreads ), done( false ) {
     }
 }
 
-void ThreadPool::dispatcher() {
-    while ( true ) {
-        unique_lock<mutex> lock( queueLock );
-
-        taskAvailableCV.wait( lock, [this]() { return !taskQueue.empty() || done; } );
-        if ( done && taskQueue.empty() ) { return; }
-
-        size_t workerId = 0;
-        bool found = false;
-
-        while (!found) {
-            for (size_t i = 0; i < wts.size(); ++i) {
-                lock_guard<mutex> guard(wts[i].mtx); 
-                if (!wts[i].busy) {
-                    workerId = i;
-                    wts[i].busy = true;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                lock.unlock();
-                this_thread::yield();
-                lock.lock();
-            }
-        }
-        {
-            lock_guard<mutex> guard(wts[workerId].mtx);
-            wts[workerId].thunk = taskQueue.front();
-        }
-        taskQueue.pop();
-        activeTasks++;
-
-        lock.unlock();
-        wts[workerId].sem.signal();
-    }
-}
-
 void ThreadPool::worker( int id ) {
-    while ( true ) {
-        wts[id].sem.wait();
-
-        if ( done && !wts[id].thunk ) break;
-
-        function<void()> job;
+    while (true) {
+        function<void()> task;
         {
-            lock_guard<mutex> guard(wts[id].mtx); // 🚨 acceso protegido
-            job = wts[id].thunk;
-            wts[id].thunk = nullptr;
-            wts[id].busy = false;
+            unique_lock<mutex> lock(queueLock);
+            taskAvailableCV.wait(lock, [this]() {
+                return !taskQueue.empty() || done;
+            });
+            if (done && taskQueue.empty()) return;
+            task = taskQueue.front();
+            taskQueue.pop();
+            activeTasks++;
         }
 
-        if (done && !job) break;
-        job();
+        task();
 
-        activeTasks--;
-        if ( activeTasks == 0 && taskQueue.empty() ) { noTasksLeftCV.notify_all(); }
+        {
+            lock_guard<mutex> lock(queueLock);
+            activeTasks--;
+            if (activeTasks == 0 && taskQueue.empty()) {
+                noTasksLeftCV.notify_all();
+            }
+        }
     }
 }
 
@@ -97,19 +63,16 @@ void ThreadPool::wait() {
 }
 
 ThreadPool::~ThreadPool() {
-    wait(); 
-
     {
-        lock_guard<mutex> lock( queueLock );
+        lock_guard<mutex> lock(queueLock);
         done = true;
     }
 
     taskAvailableCV.notify_all();
-    if ( dt.joinable() ) dt.join();
 
-    for ( auto& w : wts ) {
-        w.sem.signal();    
-        if ( w.ts.joinable() ) w.ts.join();
+    for (auto& w : wts) {
+        if (w.ts.joinable()) w.ts.join();
     }
+
     destroyed = true;
 }
