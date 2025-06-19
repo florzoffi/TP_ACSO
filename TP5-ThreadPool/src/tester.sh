@@ -28,7 +28,7 @@ rm -f "$MEMCHECK_LOG" "$HELGRIND_LOG"
 
 # Paso 2: compilación
 echo -e "\n${YELLOW}🔧 Compilando ($TARGET)...${RESET}"
-make "$TARGET" || abort ""
+make MAIN=test_custom || abort ""
 
 # Paso 3: tests funcionales
 echo -e "\n${YELLOW}🧪 Ejecutando pruebas funcionales...${RESET}"
