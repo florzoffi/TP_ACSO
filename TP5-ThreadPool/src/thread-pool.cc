@@ -106,6 +106,6 @@ ThreadPool::~ThreadPool() {
     for (auto& w : wts) {
         w.sem.signal();    
         if (w.ts.joinable()) w.ts.join();
-        destroyed = true;
     }
+    destroyed = true;
 }
