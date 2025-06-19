@@ -5,6 +5,7 @@
  */
 
 #include "thread-pool.h"
+#include <stdexcept>
 using namespace std;
 
 ThreadPool::ThreadPool(size_t numThreads) : wts(numThreads), done(false) {
