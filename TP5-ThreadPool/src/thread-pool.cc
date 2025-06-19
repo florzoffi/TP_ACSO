@@ -26,23 +26,26 @@ void ThreadPool::dispatcher() {
         size_t workerId = 0;
         bool found = false;
 
-        while ( !found ) {
-            for ( size_t i = 0; i < wts.size(); ++i ) {
-                if ( !wts[i].busy ) {
+        while (!found) {
+            for (size_t i = 0; i < wts.size(); ++i) {
+                lock_guard<mutex> guard(wts[i].mtx); 
+                if (!wts[i].busy) {
                     workerId = i;
                     wts[i].busy = true;
                     found = true;
                     break;
                 }
             }
-            if ( !found ) {
+            if (!found) {
                 lock.unlock();
                 this_thread::yield();
                 lock.lock();
             }
         }
-
-        wts[workerId].thunk = taskQueue.front();
+        {
+            lock_guard<mutex> guard(wts[workerId].mtx);
+            wts[workerId].thunk = taskQueue.front();
+        }
         taskQueue.pop();
         activeTasks++;
 
@@ -57,10 +60,16 @@ void ThreadPool::worker( int id ) {
 
         if ( done && !wts[id].thunk ) break;
 
-        wts[id].thunk();
-
-        wts[id].thunk = nullptr;
-        wts[id].busy = false;
+        function<void()> job;
+        {
+            lock_guard<mutex> guard(wts[id].mtx); // 🚨 acceso protegido
+            job = wts[id].thunk;
+            wts[id].thunk = nullptr;
+            wts[id].busy = false;
+        }
+        
+        if (done && !job) break;
+        job();
 
         activeTasks--;
         if ( activeTasks == 0 && taskQueue.empty() ) { noTasksLeftCV.notify_all(); }
