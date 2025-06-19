@@ -34,7 +34,7 @@ using namespace std;
  */
 typedef struct worker {
     thread ts;
-    function<void(void)> thunk;
+    function<void( void )> thunk;
     Semaphore sem{0}; 
     bool busy = false; 
 } worker_t;
@@ -78,7 +78,7 @@ class ThreadPool {
     bool done;                              // flag to indicate the pool is being destroyed
     mutex queueLock;                        // mutex to protect the queue of tasks
 
-    queue<function<void(void)>> taskQueue;     
+    queue<function<void( void )>> taskQueue;     
     condition_variable_any taskAvailableCV;    
     atomic<int> activeTasks{0};                
     condition_variable_any noTasksLeftCV;      
