@@ -17,22 +17,24 @@ ThreadPool::ThreadPool( size_t numThreads ) : wts( numThreads ), done( false ) {
 
 void ThreadPool::worker( int id ) {
     while (true) {
-            wts[id].sem.wait();
+        wts[id].sem.wait();
 
-            if ( done && !wts[id].thunk ) return;
+        if ( !wts[id].thunk ) {
+            if ( done ) return;     
+            continue;             
+        }
 
-            wts[id].thunk();
-
-            {
-                lock_guard<mutex> lock( queueLock );
-                wts[id].thunk = nullptr;
-                wts[id].busy = false;
-                activeTasks--;
-                if ( activeTasks == 0 && taskQueue.empty() ) {
-                    noTasksLeftCV.notify_all();
-                }
+        wts[id].thunk();
+        {
+            lock_guard<mutex> lock( queueLock );
+            wts[id].thunk = nullptr;
+            wts[id].busy = false;
+            activeTasks--;
+            if ( activeTasks == 0 && taskQueue.empty() ) {
+                noTasksLeftCV.notify_all();
             }
         }
+    }
 }
 
 void ThreadPool::schedule( const function<void( void )>& thunk ) {
