@@ -25,6 +25,7 @@ void ThreadPool::worker( int id ) {
 
             {
                 lock_guard<mutex> lock( queueLock );
+                wts[id].thunk = nullptr;
                 wts[id].busy = false;
                 activeTasks--;
                 if ( activeTasks == 0 && taskQueue.empty() ) {
