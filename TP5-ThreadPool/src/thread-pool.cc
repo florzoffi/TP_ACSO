@@ -55,7 +55,6 @@ void ThreadPool::schedule( const function<void( void )>& thunk ) {
 }
 
 void ThreadPool::wait() {
-    lock_guard<mutex> outer( waitMutex );
     unique_lock<mutex> lock( queueLock );
     noTasksLeftCV.wait( lock, [this]() { return activeTasks == 0 && taskQueue.empty(); } );
 }

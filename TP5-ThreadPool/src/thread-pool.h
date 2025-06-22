@@ -78,7 +78,6 @@ class ThreadPool {
     vector<worker_t> wts;                   // worker thread handles. you may want to change/remove this
     bool done;                              // flag to indicate the pool is being destroyed
     mutex queueLock;                        // mutex to protect the queue of tasks
-    mutex waitMutex;
 
     queue<function<void( void )>> taskQueue;     
     condition_variable_any taskAvailableCV;    
