@@ -73,8 +73,8 @@ class ThreadPool {
   private:
 
     void worker(int id);
-    //void dispatcher();
-    //thread dt;                              // dispatcher thread handle
+    void dispatcher();
+    thread dt;                              // dispatcher thread handle
     vector<worker_t> wts;                   // worker thread handles. you may want to change/remove this
     bool done;                              // flag to indicate the pool is being destroyed
     mutex queueLock;                        // mutex to protect the queue of tasks
