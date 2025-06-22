@@ -17,20 +17,28 @@ ThreadPool::ThreadPool( size_t numThreads ) : wts( numThreads ), done( false ) {
 
 void ThreadPool::worker( int id ) {
     while (true) {
+
         wts[id].sem.wait();
 
-        if ( !wts[id].thunk ) {
-            if ( done ) return;     
-            continue;             
-        }
-
-        wts[id].thunk();
+        function<void()> task;
         {
-            lock_guard<mutex> lock( queueLock );
+            lock_guard<mutex> lock(queueLock);
+            task = wts[id].thunk;
             wts[id].thunk = nullptr;
             wts[id].busy = false;
+        }
+
+        if (!task) {
+            if (done) return;
+            continue;
+        }
+
+        task();
+
+        {
+            lock_guard<mutex> lock(queueLock);
             activeTasks--;
-            if ( activeTasks == 0 && taskQueue.empty() ) {
+            if (activeTasks == 0 && taskQueue.empty()) {
                 noTasksLeftCV.notify_all();
             }
         }
@@ -101,9 +109,10 @@ void ThreadPool::dispatcher() {
             }
         }
 
-        wts[workerId].thunk = taskQueue.front();
+        function<void()> task = taskQueue.front();
         taskQueue.pop();
         activeTasks++;
+        wts[workerId].thunk = task;
         lock.unlock();
         wts[workerId].sem.signal();
     }
