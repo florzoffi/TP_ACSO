@@ -88,6 +88,7 @@ void ThreadPool::dispatcher() {
         } );
 
         if ( done && taskQueue.empty() ) return;
+        if (taskQueue.empty()) continue;
 
         size_t workerId = 0;
         bool found = false;
