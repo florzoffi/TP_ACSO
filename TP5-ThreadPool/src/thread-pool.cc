@@ -28,7 +28,7 @@ void ThreadPool::worker( int id ) {
         }
 
         if (!task) {
-            if (done) return;
+            if (done) break;
             continue;
         }
 
@@ -73,7 +73,16 @@ ThreadPool::~ThreadPool() {
     taskAvailableCV.notify_all();
 
     for (auto& w : wts) {
-        w.sem.signal(); 
+        {
+            lock_guard<mutex> lock(queueLock);
+            w.thunk = nullptr;     
+        }
+        w.sem.signal();         
+    }
+
+    if (dt.joinable()) dt.join(); 
+
+    for (auto& w : wts) {
         if (w.ts.joinable()) w.ts.join();
     }
 
@@ -88,7 +97,6 @@ void ThreadPool::dispatcher() {
         } );
 
         if ( done && taskQueue.empty() ) return;
-        if (taskQueue.empty()) continue;
 
         size_t workerId = 0;
         bool found = false;
