@@ -24,6 +24,7 @@
 #include <unistd.h>    // fork
 #include <map>
 #include <algorithm>
+#include <array>
 
 using namespace std;
 using namespace chrono;
