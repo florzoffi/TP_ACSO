@@ -70,19 +70,20 @@ ThreadPool::~ThreadPool() {
 }
 
 void ThreadPool::dispatcher() {
-    while (true) {
-        unique_lock<mutex> lock(queueLock);
-        taskAvailableCV.wait(lock, [this]() {
+    while ( true ) {
+        unique_lock<mutex> lock( queueLock );
+        taskAvailableCV.wait( lock, [this]() {
             return !taskQueue.empty() || done;
-        });
+        } );
 
-        if (done && taskQueue.empty()) return;
+        if ( done && taskQueue.empty() ) return;
 
         size_t workerId = 0;
         bool found = false;
 
-        while (!found) {
-            for (size_t i = 0; i < wts.size(); ++i) {
+        while ( !found ) {
+            if ( done ) return;
+            for ( size_t i = 0; i < wts.size(); ++i ) {
                 if (!wts[i].busy) {
                     workerId = i;
                     wts[i].busy = true;
@@ -90,7 +91,7 @@ void ThreadPool::dispatcher() {
                     break;
                 }
             }
-            if (!found) {
+            if ( !found ) {
                 lock.unlock();
                 this_thread::yield();
                 lock.lock();
