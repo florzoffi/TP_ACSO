@@ -25,7 +25,6 @@ void ThreadPool::worker( int id ) {
             lock_guard<mutex> lock(queueLock);
             task = wts[id].thunk;
             wts[id].thunk = nullptr;
-            wts[id].busy = false;
         }
 
         if (!task) {
@@ -37,6 +36,7 @@ void ThreadPool::worker( int id ) {
 
         {
             lock_guard<mutex> lock(queueLock);
+            wts[id].busy.store(false);
             activeTasks--;
             if (activeTasks == 0 && taskQueue.empty()) {
                 noTasksLeftCV.notify_all();
@@ -95,13 +95,14 @@ void ThreadPool::dispatcher() {
 
         while ( !found ) {
             if ( done ) return;
-            for ( size_t i = 0; i < wts.size(); ++i ) {
-                if (!wts[i].busy) {
-                    workerId = i;
-                    wts[i].busy = true;
-                    found = true;
-                    break;
-                }
+            for (size_t i = 0; i < wts.size(); ++i) {
+            bool expected = false;
+            if (wts[i].busy.compare_exchange_strong(expected, true)) {
+                workerId = i;
+                found = true;
+                break;
+            }
+        }
             }
             if ( !found ) {
                 lock.unlock();

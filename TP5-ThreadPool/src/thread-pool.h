@@ -36,7 +36,7 @@ typedef struct worker {
     thread ts;
     function<void( void )> thunk;
     Semaphore sem{0}; 
-    bool busy = false; 
+    atomic<bool> busy{false}; 
     mutex mtx;
 } worker_t;
 
