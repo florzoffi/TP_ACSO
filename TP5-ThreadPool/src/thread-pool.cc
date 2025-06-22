@@ -109,7 +109,7 @@ void ThreadPool::dispatcher() {
                 this_thread::yield();
                 lock.lock();
             }
-        }
+        
 
         function<void()> task = taskQueue.front();
         taskQueue.pop();
@@ -118,3 +118,4 @@ void ThreadPool::dispatcher() {
         lock.unlock();
         wts[workerId].sem.signal();
     }
+}
