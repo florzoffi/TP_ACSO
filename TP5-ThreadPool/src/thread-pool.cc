@@ -118,4 +118,3 @@ void ThreadPool::dispatcher() {
         lock.unlock();
         wts[workerId].sem.signal();
     }
-}
