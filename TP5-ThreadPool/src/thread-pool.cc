@@ -10,33 +10,28 @@ using namespace std;
 
 ThreadPool::ThreadPool( size_t numThreads ) : wts( numThreads ), done( false ) {
     for (size_t i = 0; i < numThreads; ++i) {
-        wts[i].ts = thread([this, i] { worker( i ); });
+        wts[i].ts = thread([this, i] { worker(i); });
     }
-    dt = thread( [this] { dispatcher(); } );
 }
 
 void ThreadPool::worker( int id ) {
     while (true) {
-
-        wts[id].sem.wait();
-
         function<void()> task;
         {
-            lock_guard<mutex> lock(queueLock);
-            task = wts[id].thunk;
-            wts[id].thunk = nullptr;
-        }
-
-        if (!task) {
-            if (done) break;
-            continue;
+            unique_lock<mutex> lock(queueLock);
+            taskAvailableCV.wait(lock, [this]() {
+                return !taskQueue.empty() || done;
+            });
+            if (done && taskQueue.empty()) return;
+            task = taskQueue.front();
+            taskQueue.pop();
+            activeTasks++;
         }
 
         task();
 
         {
             lock_guard<mutex> lock(queueLock);
-            wts[id].busy.store(false);
             activeTasks--;
             if (activeTasks == 0 && taskQueue.empty()) {
                 noTasksLeftCV.notify_all();
@@ -60,6 +55,7 @@ void ThreadPool::schedule( const function<void( void )>& thunk ) {
 }
 
 void ThreadPool::wait() {
+    lock_guard<mutex> outer( waitMutex );
     unique_lock<mutex> lock( queueLock );
     noTasksLeftCV.wait( lock, [this]() { return activeTasks == 0 && taskQueue.empty(); } );
 }
@@ -73,57 +69,8 @@ ThreadPool::~ThreadPool() {
     taskAvailableCV.notify_all();
 
     for (auto& w : wts) {
-        {
-            lock_guard<mutex> lock(queueLock);
-            w.thunk = nullptr;     
-        }
-        w.sem.signal();         
-    }
-
-    if (dt.joinable()) dt.join(); 
-
-    for (auto& w : wts) {
         if (w.ts.joinable()) w.ts.join();
     }
 
     destroyed = true;
-}
-
-void ThreadPool::dispatcher() {
-    while ( true ) {
-        unique_lock<mutex> lock( queueLock );
-        taskAvailableCV.wait( lock, [this]() {
-            return !taskQueue.empty() || done;
-        } );
-
-        if ( done && taskQueue.empty() ) return;
-
-        size_t workerId = 0;
-        bool found = false;
-
-        while ( !found ) {
-            if ( done ) return;
-            for (size_t i = 0; i < wts.size(); ++i) {
-            bool expected = false;
-            if (wts[i].busy.compare_exchange_strong(expected, true)) {
-                workerId = i;
-                found = true;
-                break;
-            }
-        }
-            }
-            if ( !found ) {
-                lock.unlock();
-                this_thread::yield();
-                lock.lock();
-            }
-        
-
-        function<void()> task = taskQueue.front();
-        taskQueue.pop();
-        activeTasks++;
-        wts[workerId].thunk = task;
-        lock.unlock();
-        wts[workerId].sem.signal();
-    }
 }

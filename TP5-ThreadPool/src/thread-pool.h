@@ -36,7 +36,7 @@ typedef struct worker {
     thread ts;
     function<void( void )> thunk;
     Semaphore sem{0}; 
-    atomic<bool> busy{false}; 
+    bool busy = false; 
     mutex mtx;
 } worker_t;
 
@@ -73,11 +73,12 @@ class ThreadPool {
   private:
 
     void worker(int id);
-    void dispatcher();
-    thread dt;                              // dispatcher thread handle
+    //void dispatcher();
+    //thread dt;                              // dispatcher thread handle
     vector<worker_t> wts;                   // worker thread handles. you may want to change/remove this
     bool done;                              // flag to indicate the pool is being destroyed
     mutex queueLock;                        // mutex to protect the queue of tasks
+    mutex waitMutex;
 
     queue<function<void( void )>> taskQueue;     
     condition_variable_any taskAvailableCV;    
